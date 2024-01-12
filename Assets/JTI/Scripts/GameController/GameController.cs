@@ -10,7 +10,13 @@ namespace JTI.Scripts.GameControllers
     }
     public abstract class GameControllerBase : MonoBehaviour
     {
-  
+        [SerializeField] private GameControllerSettings _settings;
+
+        public virtual void Install()
+        {
+
+        }
+
         public void Initialize()
         {
             OnInitialize();
@@ -52,13 +58,12 @@ namespace JTI.Scripts.GameControllers
     }
 
 
-    public abstract class GameController<TA> : GameControllerBase where TA : GameControllerBase.GameControllerSettings
+    public abstract class GameController<TA> : GameControllerBase where TA : GameControllerSettings
     {
         public virtual void Install(TA a)
         {
 
         }
 
-     
     }
 }

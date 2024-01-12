@@ -21,7 +21,7 @@ namespace JTI.Scripts.Managers
 
         public EventManagerLocal<EventGame> GameEvents { get; private set; }
 
-        public void InstallController<T, TU>() where TU : GameControllerBase.GameControllerSettings where T : GameController<TU>
+        public void InstallController<T, TU>() where TU : GameControllerSettings where T : GameController<TU>
         {
             try
             {
@@ -35,7 +35,19 @@ namespace JTI.Scripts.Managers
             }
         }
 
- 
+        public void InstallController(GameControllerBase a)
+        {
+            try
+            {
+                a.Install();
+                GameControllers.Add(a);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error on install controller " + a.GetType().Name + "\n" + e);
+            }
+        }
+
         public void InstallController<T, TU>(TU settings) where TU : GameControllerSettings where T : GameController<TU>
         {
             try

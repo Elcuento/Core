@@ -6,6 +6,7 @@ using JTI.Scripts.Common;
 using JTI.Scripts.Events;
 using JTI.Scripts.Localization.Data;
 using JTI.Scripts.Managers;
+using Unity.VisualScripting;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -41,7 +42,7 @@ namespace JTI.Scripts.GameControllers
             public bool IsPlaying => Source != null && Source.isPlaying;
             public float Multiply { get; private set; }
             public bool DoNotDestroy { get; private set; }
-            public AudioController<AudioControllerSettings> Controller { get; private set; }
+            public AudioController<T> Controller { get; private set; }
             public AudioClipData Data { get; private set; }
 
 
@@ -53,7 +54,7 @@ namespace JTI.Scripts.GameControllers
 
                 Source.PlayOneShot(clip, volumeMultiply);
             }
-            public AudioTrack(AudioController<AudioControllerSettings> c, string id, AudioSource source, AudioClipData data, int group = 1, bool doNotDestroy = false, float multiply = 1)
+            public AudioTrack(AudioController<T> c, string id, AudioSource source, AudioClipData data, int group = 1, bool doNotDestroy = false, float multiply = 1)
             {
                 Group = group;
                 Id = id;
