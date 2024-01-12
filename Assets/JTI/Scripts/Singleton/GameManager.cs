@@ -16,12 +16,12 @@ namespace JTI.Scripts.Managers
 
         }
 
-        public List<GameController> GameControllers { get; private set; }
-        public List<GameService> GameServices { get; private set; }
+        public List<GameControllerBase> GameControllers { get; private set; }
+        public List<GameServiceBase> GameServices { get; private set; }
 
         public EventManagerLocal<EventGame> GameEvents { get; private set; }
 
-        public void InstallController<T, TU>() where T : GameController where TU : GameController.GameControllerSettings
+        public void InstallController<T, TU>() where TU : GameControllerBase.GameControllerSettings where T : GameController<TU>
         {
             try
             {
@@ -34,12 +34,14 @@ namespace JTI.Scripts.Managers
                 Debug.LogError("Error on install controller " + typeof(T).Name + "\n" + e);
             }
         }
-        public void InstallController<T>() where T : GameController
+
+ 
+        public void InstallController<T, TU>(TU settings) where TU : GameControllerSettings where T : GameController<TU>
         {
             try
             {
                 var c = new GameObject(typeof(T).Name).AddComponent<T>();
-
+                c.Install(settings);
                 GameControllers.Add(c);
             }
             catch (Exception e)
@@ -47,11 +49,13 @@ namespace JTI.Scripts.Managers
                 Debug.LogError("Error on install controller " + typeof(T).Name + "\n" + e);
             }
         }
-        public void InstallService<T>() where T : GameService
+
+        public void InstallService<T, TU>(TU settings) where TU : GameServiceSettings where T : GameService<TU>
         {
             try
             {
                 var c = new GameObject(typeof(T).Name).AddComponent<T>();
+                c.Install(settings);
                 GameServices.Add(c);
             }
             catch (Exception e)
@@ -60,7 +64,7 @@ namespace JTI.Scripts.Managers
             }
         }
 
-        public void InstallService<T, TU>() where T : GameService where TU : GameService.GameServiceSettings
+        public void InstallService<T, TU>() where TU : GameServiceSettings where T : GameService<TU>
         {
             try
             {
@@ -107,12 +111,13 @@ namespace JTI.Scripts.Managers
                 service.Initialize();
             }
         }
-
-        public TU GetController<TU>() where TU : GameController
+ 
+        public TU GetController<TU, TE>() where TE : GameControllerSettings where TU : GameController<TE>
         {
             return (TU)GameControllers.FirstOrDefault(x => x is TU);
         }
-        public TU GetService<TU>() where TU : GameService
+
+        public TU GetService<TU,TE>() where TE : GameServiceSettings where TU : GameService<TE>
         {
             return (TU)GameServices.FirstOrDefault(x => x is TU);
         }

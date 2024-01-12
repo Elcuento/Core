@@ -1,18 +1,15 @@
 using UnityEngine;
+using static JTI.Scripts.GameServices.GameServiceBase;
 
 namespace JTI.Scripts.GameServices
 {
-    public class GameService : MonoBehaviour
+    public class GameServiceSettings
     {
-        public class GameServiceSettings
-        {
 
-        }
-        public void Install<T>(T a) where T : GameServiceSettings
-        {
+    }
 
-        }
-
+    public abstract class GameServiceBase : MonoBehaviour
+    {
         public void Initialize()
         {
             OnInitialize();
@@ -40,6 +37,14 @@ namespace JTI.Scripts.GameServices
         }
 
         protected virtual void OnLateInitialize()
+        {
+
+        }
+    }
+
+    public abstract class GameService<T> : GameServiceBase where T : GameServiceSettings
+    {
+        public void Install(T a)
         {
 
         }

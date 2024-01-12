@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace JTI.Scripts.GameServices
 {
-    public class GameServiceFileStorage : GameService
+    public class GameServiceFileStorage : GameService<GameServiceSettings>
     {
         public enum ExampleType
         {

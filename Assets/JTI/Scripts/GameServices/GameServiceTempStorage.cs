@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace JTI.Scripts.GameServices
 {
-    public class GameServiceTempStorage : GameService
+    public class GameServiceTempStorage : GameService<GameServiceBase.GameServiceSettings>
     {
         public TempStorage TempStorage { get; private set; }
 

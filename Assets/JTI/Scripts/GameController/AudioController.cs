@@ -11,26 +11,26 @@ using Object = UnityEngine.Object;
 
 namespace JTI.Scripts.GameControllers
 {
-    [RequireComponent(typeof(AudioListener))]
-    public class AudioController : GameController
+    public class AudioControllerSettings : GameControllerSettings
     {
-        public class AudioControllerSettings
+        public AudioData Data;
+
+        public bool PreLoad;
+        public Dictionary<int, float> GroupVolume;
+        public float VolumeMultiply;
+
+        public AudioControllerSettings()
         {
-            public AudioData Data;
-
-            public bool PreLoad;
-            public Dictionary<int, float> GroupVolume;
-            public float VolumeMultiply;
-
-            public AudioControllerSettings()
+            GroupVolume = new Dictionary<int, float>()
             {
-                GroupVolume = new Dictionary<int, float>()
-                {
-                    { -1, 1 }
-                };
-            }
+                { -1, 1 }
+            };
         }
+    }
 
+    [RequireComponent(typeof(AudioListener))]
+    public class AudioController<T> : GameController<T> where T : AudioControllerSettings
+    {
         [System.Serializable]
         public class AudioTrack
         {
@@ -41,7 +41,9 @@ namespace JTI.Scripts.GameControllers
             public bool IsPlaying => Source != null && Source.isPlaying;
             public float Multiply { get; private set; }
             public bool DoNotDestroy { get; private set; }
-            public AudioController Controller { get; private set; }
+            public AudioController<AudioControllerSettings> Controller { get; private set; }
+            public AudioClipData Data { get; private set; }
+
 
             private bool _isDestroyed;
 
@@ -51,7 +53,7 @@ namespace JTI.Scripts.GameControllers
 
                 Source.PlayOneShot(clip, volumeMultiply);
             }
-            public AudioTrack(AudioController c, string id, AudioSource source, int group = 1, bool doNotDestroy = false, float multiply = 1)
+            public AudioTrack(AudioController<AudioControllerSettings> c, string id, AudioSource source, AudioClipData data, int group = 1, bool doNotDestroy = false, float multiply = 1)
             {
                 Group = group;
                 Id = id;
@@ -59,6 +61,7 @@ namespace JTI.Scripts.GameControllers
                 Controller = c;
                 DoNotDestroy = doNotDestroy;
                 Multiply = multiply;
+                Data = data;
             }
 
             internal void DestroyInternal()
@@ -81,9 +84,10 @@ namespace JTI.Scripts.GameControllers
             {
                 if (IsDestroyed) return;
 
-                Source.volume = getVolumeByGroup * Multiply;
+                Source.volume = getVolumeByGroup * Multiply * (Data?.Volume ?? 1);
             }
         }
+
 
         private Dictionary<string, AudioClip> _catch;
 
@@ -96,7 +100,7 @@ namespace JTI.Scripts.GameControllers
         private EventSubscriberLocal<EventGame> _eventSubscriberLocal;
 
         private AudioTrack _commonAudioTrack;
-        public override void Install<T>(T a)
+        public override void Install(T a)
         {
             base.Install(a);
 
@@ -174,10 +178,11 @@ namespace JTI.Scripts.GameControllers
              }
         }
 
-        private void OnDestroy()
+        protected override void OnOnDestroy()
         {
             UnSubscribe();
         }
+
 
         private void Subscribe()
         {
@@ -234,7 +239,7 @@ namespace JTI.Scripts.GameControllers
             if (_catch.ContainsKey(id))
                 return _catch[id];
 
-            var clip = Resources.Load<AudioClip>($"{"Game/Audio/"}{_settings.Data.ClipFolder}{id}");
+            var clip = Resources.Load<AudioClip>($"{_settings.Data.ClipFolder}{id}");
 
             _catch.Add(id, clip);
 
@@ -316,8 +321,6 @@ namespace JTI.Scripts.GameControllers
             }
         }
 
-
-
         public void AddAndPlayTrackSequence(List<string> random, int group = 0, bool loop = true, string start = "", string final = "")
         {
             if (_sequenceCoroutine != null)
@@ -325,7 +328,6 @@ namespace JTI.Scripts.GameControllers
 
             _sequenceCoroutine = StartCoroutine(PlayTrackSequenceCor(random, group, loop, start, final));
         }
-
 
         public void PlayOneShot3D(string id, Vector3 pos)
         {
@@ -388,17 +390,28 @@ namespace JTI.Scripts.GameControllers
             if (id == null || id.Length == 0) return;
 
             var clip = GetClip(id.RandomElement());
-            var data = GetAudioData(clip.name);
+            var data = GetAudioData(clip?.name);
 
             _commonAudioTrack.PlayOneShot(clip, multiply * (data?.Volume ?? 1));
         }
         public void PlayOneShot(string id, float multiply)
         {
             var clip = GetClip(id);
+            var data = GetAudioData(clip?.name);
 
             if (clip != null)
             {
-                _commonAudioTrack.PlayOneShot(clip, multiply);
+                _commonAudioTrack.PlayOneShot(clip, multiply * (data?.Volume ?? 1));
+            }
+        }
+        public void PlayOneShotDelay(string[] id, float delay = 0, float multiply = 1, bool unscaled = false)
+        {
+            var clip = GetClip(id.RandomElement());
+            var data = GetAudioData(clip?.name);
+
+            if (clip != null)
+            {
+                StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply, unscaled, delay));
             }
         }
 
@@ -425,11 +438,13 @@ namespace JTI.Scripts.GameControllers
         {
             var source = gameObject.AddComponent<AudioSource>();
 
+            var data = GetAudioData(id);
+
             source.clip = GetClip(id);
-            source.volume = GetVolumeByGroup(group) * _settings.VolumeMultiply;
+            source.volume = GetVolumeByGroup(group) * _settings.VolumeMultiply * (data?.Volume ?? 1);
             source.loop = loop;
 
-            var tr = new AudioTrack(this, id, source, group, donNotDestroy);
+            var tr = new AudioTrack(this, id, source, data, group, donNotDestroy);
 
             _trackLists.Add(tr);
 
@@ -457,7 +472,6 @@ namespace JTI.Scripts.GameControllers
 
             a.Destroy();
         }
-
 
         public void RemoveTrack(AudioTrack track)
         {

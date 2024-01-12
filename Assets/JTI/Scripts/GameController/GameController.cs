@@ -1,18 +1,16 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
+
 
 namespace JTI.Scripts.GameControllers
 {
-    public class GameController: MonoBehaviour
+    public class GameControllerSettings
     {
-        public class GameControllerSettings
-        {
 
-        }
-
-        public virtual void Install<T>(T a) where T : GameControllerSettings
-        {
-
-        }
+    }
+    public abstract class GameControllerBase : MonoBehaviour
+    {
+  
         public void Initialize()
         {
             OnInitialize();
@@ -29,6 +27,10 @@ namespace JTI.Scripts.GameControllers
             OnAwaken();
         }
 
+        private void OnDestroy()
+        {
+            OnOnDestroy();
+        }
         protected virtual void OnAwaken()
         {
 
@@ -43,5 +45,20 @@ namespace JTI.Scripts.GameControllers
         {
 
         }
+        protected virtual void OnOnDestroy()
+        {
+
+        }
+    }
+
+
+    public abstract class GameController<TA> : GameControllerBase where TA : GameControllerBase.GameControllerSettings
+    {
+        public virtual void Install(TA a)
+        {
+
+        }
+
+     
     }
 }
