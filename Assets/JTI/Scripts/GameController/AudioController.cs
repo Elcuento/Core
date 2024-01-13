@@ -117,10 +117,10 @@ namespace JTI.Scripts.GameControllers
 
         }
 
-        protected override void CreateWrapper()
+        protected override void CreateView()
         {
-            Wrapper = new GameObject(nameof(AudioControllerWrapper))
-                .AddComponent<AudioControllerWrapper>();
+            View = new GameObject(nameof(AudioControllerView))
+                .AddComponent<AudioControllerView>();
         }
 
         protected override void OnInitialize()
@@ -138,7 +138,7 @@ namespace JTI.Scripts.GameControllers
 
         private void PreLoad()
         {
-            Wrapper.StartCoroutine(_loadAsync());
+            View.StartCoroutine(_loadAsync());
         }
 
         private IEnumerator _loadAsync()
@@ -331,9 +331,9 @@ namespace JTI.Scripts.GameControllers
         public void AddAndPlayTrackSequence(List<string> random, int group = 0, bool loop = true, string start = "", string final = "")
         {
             if (_sequenceCoroutine != null)
-                Wrapper.StopCoroutine(_sequenceCoroutine);
+                View.StopCoroutine(_sequenceCoroutine);
 
-            _sequenceCoroutine = Wrapper.StartCoroutine(PlayTrackSequenceCor(random, group, loop, start, final));
+            _sequenceCoroutine = View.StartCoroutine(PlayTrackSequenceCor(random, group, loop, start, final));
         }
 
         public void PlayOneShot3D(string id, Vector3 pos)
@@ -418,7 +418,7 @@ namespace JTI.Scripts.GameControllers
 
             if (clip != null)
             {
-                Wrapper.StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply, unscaled, delay));
+                View.StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply, unscaled, delay));
             }
         }
 
@@ -428,7 +428,7 @@ namespace JTI.Scripts.GameControllers
 
             if (clip != null)
             {
-                Wrapper.StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply, unscaled, delay));
+                View.StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply, unscaled, delay));
             }
         }
 
@@ -443,7 +443,7 @@ namespace JTI.Scripts.GameControllers
 
         public AudioTrack CreateTrack(string id, int group, bool loop = false, bool donNotDestroy = false)
         {
-            var source = Wrapper.AddComponent<AudioSource>();
+            var source = View.AddComponent<AudioSource>();
 
             var data = GetAudioData(id);
 
@@ -493,7 +493,7 @@ namespace JTI.Scripts.GameControllers
 
         public void RemoveListener()
         {
-            var l = Wrapper.GetComponent<AudioListener>();
+            var l = View.GetComponent<AudioListener>();
             if (l != null)
             {
                 Object.Destroy(l);
@@ -502,10 +502,10 @@ namespace JTI.Scripts.GameControllers
 
         public void AddListener()
         {
-            var l = Wrapper.GetComponent<AudioListener>();
+            var l = View.GetComponent<AudioListener>();
             if (l == null)
             {
-                Wrapper.gameObject.AddComponent<AudioListener>();
+                View.gameObject.AddComponent<AudioListener>();
             }
         }
     }

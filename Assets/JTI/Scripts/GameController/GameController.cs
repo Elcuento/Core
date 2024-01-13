@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 
 namespace JTI.Scripts.GameControllers
@@ -12,19 +11,22 @@ namespace JTI.Scripts.GameControllers
     
     public abstract class GameController<TA> where TA : GameControllerSettings
     {
-        public GameControllerWrapper Wrapper;
+        public GameControllerView View { get; protected set; }
 
         [SerializeField] private GameControllerSettings _settings;
-
+        protected GameController(bool a)
+        {
+            CreateView();
+        }
         protected GameController()
         {
-            CreateWrapper();
+            CreateView();
         }
 
-        protected virtual void CreateWrapper()
+        protected virtual void CreateView()
         {
-            Wrapper = new GameObject(typeof(TA).Name)
-                .AddComponent<GameControllerWrapper>();
+            View = new GameObject(typeof(TA).Name)
+                .AddComponent<GameControllerView>();
         }
         public virtual void Install()
         {

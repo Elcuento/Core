@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace JTI.Scripts.GameControllers
 {
-    public class AudioControllerWrapper : GameControllerWrapper
+    public class AudioControllerView : GameControllerView
     {
         public AudioControllerSettings Settings;
         public AudioController<AudioControllerSettings> Controller { get; private set; }

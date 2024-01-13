@@ -24,7 +24,7 @@ namespace JTI.Scripts.Managers
 
         }
 
-        public List<GameControllerWrapper> GameControllers { get; private set; }
+        public List<GameControllerView> GameControllers { get; private set; }
         public List<GameServiceBase> GameServices { get; private set; }
 
         public EventManagerLocal<EventGame> GameEvents { get; private set; }
@@ -34,7 +34,7 @@ namespace JTI.Scripts.Managers
             try
             {
                 var controller = new T();
-                var wrapper = controller.Wrapper;
+                var wrapper = controller.View;
                 controller.Install();
                 GameControllers.Add(wrapper);
             }
@@ -62,7 +62,7 @@ namespace JTI.Scripts.Managers
             try
             {
                 var controller = new T();
-                var wrapper = controller.Wrapper;
+                var wrapper = controller.View;
                 controller.Install(settings);
                 GameControllers.Add(wrapper);
             }
@@ -104,7 +104,7 @@ namespace JTI.Scripts.Managers
         {
             base.OnAwaken();
 
-            GameControllers = new List<GameControllerWrapper>();
+            GameControllers = new List<GameControllerView>();
             GameEvents = new EventManagerLocal<EventGame>();
             GameServices = new List<GameServiceBase>();
         }
