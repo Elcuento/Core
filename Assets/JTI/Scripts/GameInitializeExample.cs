@@ -12,7 +12,8 @@ namespace JTI.Scripts
         {
             GameManager.Instance.Install<GameManager.GameManagerSettings>();
           //  GameManager.Instance.InstallService<GameServiceFileStorage, GameServiceSettings>();
-            GameManager.Instance.InstallController<AudioController<AudioControllerSettings>, AudioControllerSettings>(new AudioControllerSettings());
+            GameManager.Instance.InstallController<AudioController<AudioControllerSettings>, 
+                AudioControllerSettings>(new AudioControllerSettings());
             GameManager.Instance.Initialize();
         }
     }
