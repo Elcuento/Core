@@ -12,6 +12,8 @@ using Object = UnityEngine.Object;
 
 namespace JTI.Scripts.GameControllers
 {
+
+    [System.Serializable]
     public class AudioControllerSettings : GameControllerSettings
     {
         public AudioData Data;
@@ -45,9 +47,7 @@ namespace JTI.Scripts.GameControllers
             public AudioController<T> Controller { get; private set; }
             public AudioClipData Data { get; private set; }
 
-
             private bool _isDestroyed;
-
             public void PlayOneShot(AudioClip clip, float volumeMultiply = 1)
             {
                 if (IsDestroyed) return;
@@ -117,6 +117,12 @@ namespace JTI.Scripts.GameControllers
 
         }
 
+        protected override void CreateWrapper()
+        {
+            Wrapper = new GameObject(nameof(AudioControllerWrapper))
+                .AddComponent<AudioControllerWrapper>();
+        }
+
         protected override void OnInitialize()
         {
             _commonAudioTrack = CreateTrack("AudioSource_" + Guid.NewGuid(),-1,true);
@@ -132,7 +138,7 @@ namespace JTI.Scripts.GameControllers
 
         private void PreLoad()
         {
-            StartCoroutine(_loadAsync());
+            Wrapper.StartCoroutine(_loadAsync());
         }
 
         private IEnumerator _loadAsync()
@@ -325,9 +331,9 @@ namespace JTI.Scripts.GameControllers
         public void AddAndPlayTrackSequence(List<string> random, int group = 0, bool loop = true, string start = "", string final = "")
         {
             if (_sequenceCoroutine != null)
-                StopCoroutine(_sequenceCoroutine);
+                Wrapper.StopCoroutine(_sequenceCoroutine);
 
-            _sequenceCoroutine = StartCoroutine(PlayTrackSequenceCor(random, group, loop, start, final));
+            _sequenceCoroutine = Wrapper.StartCoroutine(PlayTrackSequenceCor(random, group, loop, start, final));
         }
 
         public void PlayOneShot3D(string id, Vector3 pos)
@@ -357,7 +363,7 @@ namespace JTI.Scripts.GameControllers
                         ? 1f
                         : data.Volume);
                 source.Play();
-                Destroy(go, clip.length);
+                Object.Destroy(go, clip.length);
             }
         }
 
@@ -382,7 +388,7 @@ namespace JTI.Scripts.GameControllers
                 source.rolloffMode = AudioRolloffMode.Linear;
                 source.maxDistance = areaSize <= 1 ? 1.1f : areaSize;
                 source.Play(1);
-                Destroy(go, clip.length);
+                Object.Destroy(go, clip.length);
             }
         }
 
@@ -412,7 +418,7 @@ namespace JTI.Scripts.GameControllers
 
             if (clip != null)
             {
-                StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply, unscaled, delay));
+                Wrapper.StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply, unscaled, delay));
             }
         }
 
@@ -422,7 +428,7 @@ namespace JTI.Scripts.GameControllers
 
             if (clip != null)
             {
-                StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply, unscaled, delay));
+                Wrapper.StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply, unscaled, delay));
             }
         }
 
@@ -437,7 +443,7 @@ namespace JTI.Scripts.GameControllers
 
         public AudioTrack CreateTrack(string id, int group, bool loop = false, bool donNotDestroy = false)
         {
-            var source = gameObject.AddComponent<AudioSource>();
+            var source = Wrapper.AddComponent<AudioSource>();
 
             var data = GetAudioData(id);
 
@@ -487,19 +493,19 @@ namespace JTI.Scripts.GameControllers
 
         public void RemoveListener()
         {
-            var l = GetComponent<AudioListener>();
+            var l = Wrapper.GetComponent<AudioListener>();
             if (l != null)
             {
-                Destroy(l);
+                Object.Destroy(l);
             }
         }
 
         public void AddListener()
         {
-            var l = GetComponent<AudioListener>();
+            var l = Wrapper.GetComponent<AudioListener>();
             if (l == null)
             {
-                gameObject.AddComponent<AudioListener>();
+                Wrapper.gameObject.AddComponent<AudioListener>();
             }
         }
     }

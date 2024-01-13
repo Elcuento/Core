@@ -9,52 +9,62 @@ using UnityEngine;
 
 namespace JTI.Scripts.Managers
 {
-    public class GameManager : Singleton<GameManager, SingletonSettings>
+    public class SingletonSettingsGameManager : SingletonSettings
+    {
+        public override bool IsAutoLoaded { get; set; } = true;
+        public override bool IsAutoCreated { get; set; } = true;
+        public override bool IsDontDestroyOnLoad { get; set; } = true;
+
+        public override string AutoLoadedPath => $"{Application.persistentDataPath}/Game/Prefabs/Singleton/";
+    }
+    public class GameManager : Singleton<GameManager, SingletonSettingsGameManager>
     {
         public class GameManagerSettings
         {
 
         }
 
-        public List<GameControllerBase> GameControllers { get; private set; }
+        public List<GameControllerWrapper> GameControllers { get; private set; }
         public List<GameServiceBase> GameServices { get; private set; }
 
         public EventManagerLocal<EventGame> GameEvents { get; private set; }
 
-        public void InstallController<T, TU>() where TU : GameControllerSettings where T : GameController<TU>
+        public void InstallController<T, TU>() where TU : GameControllerSettings where T : GameController<TU>, new()
         {
             try
             {
-                var c = new GameObject(typeof(T).Name).AddComponent<T>();
-                c.Install(default(TU));
-                GameControllers.Add(c);
+                var controller = new T();
+                var wrapper = controller.Wrapper;
+                controller.Install();
+                GameControllers.Add(wrapper);
             }
             catch (Exception e)
             {
                 Debug.LogError("Error on install controller " + typeof(T).Name + "\n" + e);
             }
         }
-
-        public void InstallController(GameControllerBase a)
+        
+     /*   public void InstallController(GameControllerWrapper a)
         {
             try
             {
-                a.Install();
+                a.Initialize<>();
                 GameControllers.Add(a);
             }
             catch (Exception e)
             {
                 Debug.LogError("Error on install controller " + a.GetType().Name + "\n" + e);
             }
-        }
+        }*/
 
-        public void InstallController<T, TU>(TU settings) where TU : GameControllerSettings where T : GameController<TU>
+        public void InstallController<T, TU>(TU settings) where TU : GameControllerSettings where T : GameController<TU>, new()
         {
             try
             {
-                var c = new GameObject(typeof(T).Name).AddComponent<T>();
-                c.Install(settings);
-                GameControllers.Add(c);
+                var controller = new T();
+                var wrapper = controller.Wrapper;
+                controller.Install(settings);
+                GameControllers.Add(wrapper);
             }
             catch (Exception e)
             {
@@ -88,6 +98,15 @@ namespace JTI.Scripts.Managers
             {
                 Debug.LogError("Error on install service " + typeof(T).Name + "\n" + e);
             }
+        }
+
+        protected override void OnAwaken()
+        {
+            base.OnAwaken();
+
+            GameControllers = new List<GameControllerWrapper>();
+            GameEvents = new EventManagerLocal<EventGame>();
+            GameServices = new List<GameServiceBase>();
         }
 
         public virtual void Install<T>() where T : GameManagerSettings
@@ -126,7 +145,7 @@ namespace JTI.Scripts.Managers
  
         public TU GetController<TU, TE>() where TE : GameControllerSettings where TU : GameController<TE>
         {
-            return (TU)GameControllers.FirstOrDefault(x => x is TU);
+            return null;//(TU)GameControllers.FirstOrDefault(x => x is TU);
         }
 
         public TU GetService<TU,TE>() where TE : GameServiceSettings where TU : GameService<TE>
@@ -146,7 +165,7 @@ namespace JTI.Scripts.Managers
         {
             foreach (var gameController in GameControllers)
             {
-                gameController.Initialize();
+               // gameController.Initialize();
             }
 
         }
@@ -154,7 +173,7 @@ namespace JTI.Scripts.Managers
         {
             foreach (var gameController in GameControllers)
             {
-                gameController.LateInitialize();
+               // gameController.LateInitialize();
             }
         }
     }

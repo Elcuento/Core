@@ -4,14 +4,28 @@ using UnityEngine;
 
 namespace JTI.Scripts.GameControllers
 {
+    [System.Serializable]
     public class GameControllerSettings
     {
 
     }
-    public abstract class GameControllerBase : MonoBehaviour
+    
+    public abstract class GameController<TA> where TA : GameControllerSettings
     {
+        public GameControllerWrapper Wrapper;
+
         [SerializeField] private GameControllerSettings _settings;
 
+        protected GameController()
+        {
+            CreateWrapper();
+        }
+
+        protected virtual void CreateWrapper()
+        {
+            Wrapper = new GameObject(typeof(TA).Name)
+                .AddComponent<GameControllerWrapper>();
+        }
         public virtual void Install()
         {
 
@@ -29,7 +43,7 @@ namespace JTI.Scripts.GameControllers
 
         private void Awake()
         {
-            DontDestroyOnLoad(gameObject);
+            //DontDestroyOnLoad(gameObject);
             OnAwaken();
         }
 
@@ -37,6 +51,7 @@ namespace JTI.Scripts.GameControllers
         {
             OnOnDestroy();
         }
+
         protected virtual void OnAwaken()
         {
 
@@ -51,15 +66,11 @@ namespace JTI.Scripts.GameControllers
         {
 
         }
+
         protected virtual void OnOnDestroy()
         {
 
         }
-    }
-
-
-    public abstract class GameController<TA> : GameControllerBase where TA : GameControllerSettings
-    {
         public virtual void Install(TA a)
         {
 

@@ -3,7 +3,7 @@ using UnityEngine;
 namespace JTI.Scripts.Managers
 {
 
-    public class Singleton<T,TS> : MonoBehaviour where T : Component  where TS : SingletonSettings
+    public class Singleton<T,TS> : MonoBehaviour where T : Component  where TS : SingletonSettings, new()
     {
         private static T _instance;
         private static bool _isApplicationQuiting;
@@ -17,7 +17,10 @@ namespace JTI.Scripts.Managers
 
                 if (_isApplicationQuiting || _isDestroyed) return null;
 
-                _settings ??= default(TS);
+                if (_settings == null)
+                {
+                    _settings = new TS();
+                }
 
                 if (_instance != null)
                     return _instance;
