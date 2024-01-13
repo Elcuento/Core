@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace JTI.Scripts.Storage
 {
-    public class FileStorage<T> where T : Enum
+    public class FileStorageEnum<T> where T : Enum
     {
         public class ValueChange
         {
@@ -19,15 +19,17 @@ namespace JTI.Scripts.Storage
 
         protected class Variable
         {
+            public string Name;
             public object Value;
             public bool Saved;
         }
 
         protected List<Variable> _values;
+        protected List<string> _listNames;
         protected bool _noSave;
         protected virtual string _path { get; } = Application.persistentDataPath;
         public string Prefix => Application.isEditor ? ".txt" : "";
-        //  public string Prefix => "";
+
         public void UnLoad<T>(Enum type)
         {
             var n = Convert.ToInt32(type);
@@ -70,13 +72,17 @@ namespace JTI.Scripts.Storage
             OnValueChangeEvent -= ev;
         }
 
-        public FileStorage()
+        public FileStorageEnum()
         {
             _values = new List<Variable>();
+            _listNames = new List<string>();
 
-            for (var i = 0; i < Enum.GetValues(typeof(T)).Length; i++)
+            var names = Enum.GetNames(typeof(T));
+
+            for (var i = 0; i < names.Length; i++)
             {
                 _values.Add(null);
+                _listNames.Add(names[i]);
             }
 
             try
@@ -94,7 +100,7 @@ namespace JTI.Scripts.Storage
 
         public virtual string GetIndexName(int i)
         {
-            return Enum.GetNames(typeof(T))[i]; // TODO SUPER SLOW
+            return _listNames[i]; // TODO SUPER SLOW
         }
 
 

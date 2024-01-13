@@ -23,6 +23,10 @@ namespace JTI.Scripts.Events
             _eventManager = eventManager;
 
         }
+        public void Publish<T>(T eventMessage) where T : TO
+        {
+            _eventManager.Publish(eventMessage);
+        }
         public void Subscribe<TB>(JTI.Scripts.Events.EventHandler<TB> eventAction) where TB : TO
         {
             var t = typeof(TB);
@@ -45,6 +49,8 @@ namespace JTI.Scripts.Events
 
             _eventManager.Subscribe<TB>(Ev);
         }
+
+
 
         public void Unsubscribe<T>(JTI.Scripts.Events.EventHandler<T> eventAction) where T : TO
         {

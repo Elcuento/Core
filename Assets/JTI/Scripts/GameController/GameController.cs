@@ -14,10 +14,7 @@ namespace JTI.Scripts.GameControllers
         public GameControllerView View { get; protected set; }
 
         [SerializeField] private GameControllerSettings _settings;
-        protected GameController(bool a)
-        {
-            CreateView();
-        }
+
         protected GameController()
         {
             CreateView();
@@ -43,20 +40,9 @@ namespace JTI.Scripts.GameControllers
             OnLateInitialize();
         }
 
-        private void Awake()
-        {
-            //DontDestroyOnLoad(gameObject);
-            OnAwaken();
-        }
-
         private void OnDestroy()
         {
             OnOnDestroy();
-        }
-
-        protected virtual void OnAwaken()
-        {
-
         }
 
         protected virtual void OnInitialize()

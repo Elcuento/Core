@@ -17,6 +17,7 @@ namespace JTI.Scripts.Managers
 
         public override string AutoLoadedPath => $"{Application.persistentDataPath}/Game/Prefabs/Singleton/";
     }
+
     public class GameManager : Singleton<GameManager, SingletonSettingsGameManager>
     {
         public class GameManagerSettings
@@ -27,7 +28,7 @@ namespace JTI.Scripts.Managers
         public List<GameControllerView> GameControllers { get; private set; }
         public List<GameServiceBase> GameServices { get; private set; }
 
-        public EventManagerLocal<EventGame> GameEvents { get; private set; }
+        public EventManagerLocal<GameEvent> GameEvents { get; private set; }
 
         public void InstallController<T, TU>() where TU : GameControllerSettings where T : GameController<TU>, new()
         {
@@ -105,7 +106,7 @@ namespace JTI.Scripts.Managers
             base.OnAwaken();
 
             GameControllers = new List<GameControllerView>();
-            GameEvents = new EventManagerLocal<EventGame>();
+            GameEvents = new EventManagerLocal<GameEvent>();
             GameServices = new List<GameServiceBase>();
         }
 

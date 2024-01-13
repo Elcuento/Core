@@ -96,18 +96,18 @@ namespace JTI.Scripts.GameControllers
 
         private List<AudioTrack> _trackLists;
 
-        private AudioControllerSettings _settings;
+        private T _settings;
 
-        private EventSubscriberLocal<EventGame> _eventSubscriberLocal;
+        private EventSubscriberLocal<GameEvent> _eventSubscriberLocal;
 
         private AudioTrack _commonAudioTrack;
         public override void Install(T a)
         {
             base.Install(a);
 
-            _settings = a as AudioControllerSettings;
+            _settings = a as T;
 
-            _eventSubscriberLocal = new EventSubscriberLocal<EventGame>(GameManager.Instance.GameEvents);
+            _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents);
 
             if (_settings == null || _settings.Data == null)
             {
@@ -193,10 +193,10 @@ namespace JTI.Scripts.GameControllers
 
         private void Subscribe()
         {
-            _eventSubscriberLocal.Subscribe<ChangeSoundSettings>(OnChangeAudioSettings);
+            _eventSubscriberLocal.Subscribe<ChangeSoundSettingsEvent>(OnChangeAudioSettings);
         }
 
-        private void OnChangeAudioSettings(ChangeSoundSettings data)
+        private void OnChangeAudioSettings(ChangeSoundSettingsEvent data)
         {
             if (data.GroupOnChangeVolume == null) return;
 
