@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using JTI.Scripts.Storage;
@@ -5,20 +6,28 @@ using UnityEngine;
 
 namespace JTI.Scripts.GameServices
 {
-    public class GameServiceFileStorage : GameService<GameServiceSettings>
+    public class GameServiceFileStorageGameServiceSettings
     {
-        public enum ExampleType
-        {
-            One,Two, Three
-        }
-
-        public FileStorage<ExampleType> Storage { get; private set; }
+        public bool AutoSave;
+    }
+    public class GameServiceFileStorage<T> : GameService<GameServiceSettings> where T : Enum
+    {
+        public FileStorageEnum<T> Storage { get; private set; }
 
         protected override void OnInitialize()
         {
             base.OnInitialize();
 
-            Storage = new FileStorage<ExampleType>();
+            Storage = new FileStorageEnum<T>();
+        }
+
+        public void Set(T a, object o) {
+            Storage.Set(a, o);
+        }
+
+        public void Destroy(T a, object o)
+        {
+            Storage.Destroy(a);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using JTI.Scripts.GameControllers;
 using JTI.Scripts.GameServices;
@@ -12,8 +13,13 @@ namespace JTI.Scripts
         {
             GameManager.Instance.Install<GameManager.GameManagerSettings>();
           //  GameManager.Instance.InstallService<GameServiceFileStorage, GameServiceSettings>();
+
             GameManager.Instance.InstallController<AudioController<AudioControllerSettings>, 
                 AudioControllerSettings>(new AudioControllerSettings());
+            GameManager.Instance.InstallController<TimeController<TimeControllerSettings>,
+                TimeControllerSettings>(new TimeControllerSettings());
+            GameManager.Instance.InstallController<CounterController<CounterControllerSettings>,
+                CounterControllerSettings>(new CounterControllerSettings());
             GameManager.Instance.Initialize();
         }
     }

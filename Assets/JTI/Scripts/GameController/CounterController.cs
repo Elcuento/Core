@@ -29,6 +29,8 @@ namespace JTI.Scripts.Managers
 
         private T _settings;
 
+        private FileStorageString _storage;
+
         public override void Install(T a)
         {
             base.Install(a);
@@ -78,7 +80,6 @@ namespace JTI.Scripts.Managers
 
         public Timer AddGetTimer(string t, int period, int capacity)
         {
-
             var timer = Timers.Find(x => x.Type == t);
 
             if (timer != null)
@@ -108,14 +109,14 @@ namespace JTI.Scripts.Managers
 
         public void Load()
         {
-            var timers = GameManager.Instance.GetController<FileStorage<>>()
+     /*       var timers = GameManager.Instance.GetController<FileStorage<>>()
             if (timers != null)
             {
                 foreach (var timer in timers)
                 {
                     Timers.Add(new Timer(timer));
                 }
-            }
+            }*/
         }
     }
 }

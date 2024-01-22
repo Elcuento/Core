@@ -27,6 +27,7 @@ namespace JTI.Scripts.Storage
         protected Dictionary<string,Variable> _values;
 
         protected bool _noSave;
+        protected bool _autoSave;
         protected virtual string _path { get; } = Application.persistentDataPath;
         public string Prefix => Application.isEditor ? ".txt" : "";
 
@@ -43,6 +44,10 @@ namespace JTI.Scripts.Storage
             _noSave = !a;
         }
 
+        public void SetAutosave( bool a)
+        {
+            _autoSave = a;
+        }
         protected void SetUnSave(Variable aVariable)
         {
             if (aVariable != null)
@@ -70,6 +75,7 @@ namespace JTI.Scripts.Storage
 
         public FileStorageString()
         {
+            _autoSave = true;
             _values = new Dictionary<string, Variable>();
 
             try
