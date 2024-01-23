@@ -3,32 +3,36 @@
 
 namespace JTI.Scripts.GameControllers
 {
-    [System.Serializable]
-    public class GameControllerSettings
+
+
+    public abstract class GameController
     {
-
-    }
-    
-    public abstract class GameController<TA> where TA : GameControllerSettings
-    {
-        public GameControllerView View { get; protected set; }
-
-        [SerializeField] private GameControllerSettings _settings;
-
-        protected GameController()
-        {
-            CreateView();
-        }
-
-        protected virtual void CreateView()
-        {
-            View = new GameObject(typeof(TA).Name)
-                .AddComponent<GameControllerView>();
-        }
-        public virtual void Install()
+        public class GameControllerSettings
         {
 
         }
+
+        public virtual GameControllerWrapper View { get; protected set; }
+
+        protected GameController(GameControllerSettings settings)
+        {
+           
+        }
+
+        public void SetWrapper(GameControllerWrapper a)
+        {
+            View = a;
+        }
+
+        public void Install()
+        {
+            if (View != null) return;
+
+            CreateWrapper();
+
+            OnInstall();
+        }
+
 
         public void Initialize()
         {
@@ -45,6 +49,15 @@ namespace JTI.Scripts.GameControllers
             OnOnDestroy();
         }
 
+        protected virtual void CreateWrapper()
+        {
+            if (View != null) return;
+
+            View = new GameObject(GetType().Name)
+                .AddComponent<GameControllerWrapper>();
+        }
+        
+
         protected virtual void OnInitialize()
         {
 
@@ -59,7 +72,7 @@ namespace JTI.Scripts.GameControllers
         {
 
         }
-        public virtual void Install(TA a)
+        protected virtual void OnInstall()
         {
 
         }

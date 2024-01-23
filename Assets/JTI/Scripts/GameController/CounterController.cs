@@ -14,41 +14,31 @@ using UnityEngine;
 namespace JTI.Scripts.Managers
 {
     [System.Serializable]
-    public class CounterControllerSettings : GameControllerSettings
+
+    public class CounterController : GameController
     {
-        public CounterControllerSettings()
+        public class CounterControllerSettings : GameControllerSettings
         {
-           
+            public CounterControllerSettings()
+            {
+
+            }
         }
-    }
-    public class CounterController<T> : GameController<T> where T : CounterControllerSettings
-    {
         public List<Timer> Timers { get; set; }
 
         private EventSubscriberLocal<GameEvent> _eventSubscriberLocal;
 
-        private T _settings;
+        private CounterControllerSettings _settings;
 
         private FileStorageString _storage;
 
-        public override void Install(T a)
-        {
-            base.Install(a);
-
-            _settings = a as T;
-
-            _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents); 
-            
-            if (_settings == null)
-            {
-                Debug.LogError("No data was set !");
-                return;
-            }
-        }
-
-        public CounterController()
+        public CounterController(CounterControllerSettings s) : base(s)
         {
             Timers = new List<Timer>();
+            
+            _settings = s;
+
+            _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents);
         }
 
         protected override void OnInitialize()

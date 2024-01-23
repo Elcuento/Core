@@ -12,22 +12,22 @@ using UnityEngine;
 
 namespace JTI.Scripts.Managers
 {
-    [System.Serializable]
-    public class TimeControllerSettings : GameControllerSettings
+
+    public class TimeController : GameController
     {
-        public bool SendEventTick;
-        public int CriticalFps;
-        public TimeControllerSettings()
+        [System.Serializable]
+        public class TimeControllerSettings : GameControllerSettings
         {
-            CriticalFps = 15;
+            public bool SendEventTick;
+            public int CriticalFps;
+            public TimeControllerSettings()
+            {
+                CriticalFps = 15;
+            }
         }
-    }
-    public class TimeController<T> : GameController<T> where T : TimeControllerSettings
-    {
         public List<Timer> Timers { get; set; }
 
         public DateTime Now { get; private set; }
-
         public long NowUnixSeconds { get; private set; }
         public long NowUnixSecondsExtra { get; private set; }
 
@@ -47,7 +47,36 @@ namespace JTI.Scripts.Managers
 
         private EventSubscriberLocal<GameEvent> _eventSubscriberLocal;
 
-        private T _settings;
+        private TimeControllerSettings _settings;
+
+
+        public TimeController(TimeControllerSettings s) : base(s)
+        {
+            Timers = new List<Timer>();
+
+            _settings = s;
+
+            _currentTimeScale = 1;
+
+            _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents);
+
+            Update();
+
+            _startTimeScale = Time.timeScale;
+
+            _physicDelta = Time.fixedDeltaTime;
+
+
+        }
+
+        protected override void CreateWrapper()
+        {
+            View = new GameObject(GetType().Name)
+                .AddComponent<TimeControllerView>();
+
+            var v = (TimeControllerView)View;
+            v.OnTickUpdate += Update;
+        }
 
         public void SetPause(bool pause)
         {
@@ -57,22 +86,6 @@ namespace JTI.Scripts.Managers
             _currentTimeScale = Time.timeScale;
 
             _slowMoTimer = 0;
-        }
-
-        public override void Install(T a)
-        {
-            base.Install(a);
-
-            _settings = a as T;
-
-            _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents); 
-            
-            if (_settings == null)
-            {
-                Debug.LogError("No data was set !");
-                return;
-            }
-
         }
 
         public void SlowMo(float time, float timeScale)
@@ -171,18 +184,6 @@ namespace JTI.Scripts.Managers
              DOTween.Sequence()
                  .SetDelay(time)
                  .OnComplete(() => { action(); });
-        }
-
-        public TimeController()
-        {
-            Timers = new List<Timer>();
-            _currentTimeScale = 1;
-
-            Update();
-
-            _startTimeScale = Time.timeScale;
-
-            _physicDelta = Time.fixedDeltaTime;
         }
 
         public void Initialize(List<Timers.Dto.Timer> timers)

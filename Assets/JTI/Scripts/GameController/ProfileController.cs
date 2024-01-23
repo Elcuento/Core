@@ -13,46 +13,28 @@ using UnityEngine;
 
 namespace JTI.Scripts.Managers
 {
-    [System.Serializable]
-    public class ProfileControllerSettings : GameControllerSettings
-    {
-        public bool Autosave;
-        public ProfileControllerSettings()
-        {
-            Autosave = true;
-        }
-    }
 
-    public class ProfileController<T> : GameController<T> where T : ProfileControllerSettings
+
+    public class ProfileController : GameController
     {
+        [System.Serializable]
+        public class ProfileControllerSettings : GameControllerSettings
+        {
+            public bool Autosave;
+            public ProfileControllerSettings()
+            {
+                Autosave = true;
+            }
+        }
         public EventManagerLocal<ProfileEvent> GameEvents { get; private set; }
 
         private EventSubscriberLocal<GameEvent> _eventSubscriberLocal;
 
-        private T _settings;
+        private ProfileControllerSettings _settings;
 
         private FileStorageString _storage;
 
-        public override void Install(T a)
-        {
-            base.Install(a);
-
-            _settings = a as T;
-
-            GameEvents = new EventManagerLocal<ProfileEvent>();
-
-            _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents);
-
-            _storage = new FileStorageString();
-            _storage.SetAutosave(_settings.Autosave);
-
-            if (_settings == null)
-            {
-                Debug.LogError("No data was set !");
-                return;
-            }
-        }
-
+ 
         public void Get(Enum a, object def)
         {
             _storage.LoadDefault(a.ToString(), def);
@@ -73,9 +55,16 @@ namespace JTI.Scripts.Managers
            return _storage.IsExist(a.ToString());
         }
 
-        public ProfileController()
+        public ProfileController(ProfileControllerSettings s) : base(s)
         {
-        
+            _settings = s;
+
+            GameEvents = new EventManagerLocal<ProfileEvent>();
+
+            _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents);
+
+            _storage = new FileStorageString();
+            _storage.SetAutosave(_settings.Autosave);
         }
 
         protected override void OnInitialize()

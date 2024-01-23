@@ -12,28 +12,28 @@ using Object = UnityEngine.Object;
 
 namespace JTI.Scripts.GameControllers
 {
-
-    [System.Serializable]
-    public class AudioControllerSettings : GameControllerSettings
-    {
-        public AudioData Data;
-
-        public bool PreLoad;
-        public Dictionary<int, float> GroupVolume;
-        public float VolumeMultiply;
-
-        public AudioControllerSettings()
-        {
-            GroupVolume = new Dictionary<int, float>()
-            {
-                { -1, 1 }
-            };
-        }
-    }
-
     [RequireComponent(typeof(AudioListener))]
-    public class AudioController<T> : GameController<T> where T : AudioControllerSettings
+    public class AudioController : GameController
     {
+        [System.Serializable]
+        public class AudioControllerSettings : GameControllerSettings
+        {
+            public AudioData Data;
+
+            public bool PreLoad;
+            public Dictionary<int, float> GroupVolume;
+            public float VolumeMultiply;
+
+            public AudioControllerSettings(AudioData d)
+            {
+                Data = d;
+                GroupVolume = new Dictionary<int, float>()
+                {
+                    { -1, 1 }
+                };
+            }
+        }
+
         [System.Serializable]
         public class AudioTrack
         {
@@ -44,8 +44,9 @@ namespace JTI.Scripts.GameControllers
             public bool IsPlaying => Source != null && Source.isPlaying;
             public float Multiply { get; private set; }
             public bool DoNotDestroy { get; private set; }
-            public AudioController<T> Controller { get; private set; }
             public AudioClipData Data { get; private set; }
+
+            public AudioController Controller { get; private set; }
 
             private bool _isDestroyed;
             public void PlayOneShot(AudioClip clip, float volumeMultiply = 1)
@@ -54,7 +55,7 @@ namespace JTI.Scripts.GameControllers
 
                 Source.PlayOneShot(clip, volumeMultiply);
             }
-            public AudioTrack(AudioController<T> c, string id, AudioSource source, AudioClipData data, int group = 1, bool doNotDestroy = false, float multiply = 1)
+            public AudioTrack(AudioController c, string id, AudioSource source, AudioClipData data, int group = 1, bool doNotDestroy = false, float multiply = 1)
             {
                 Group = group;
                 Id = id;
@@ -89,23 +90,22 @@ namespace JTI.Scripts.GameControllers
             }
         }
 
-
         private Dictionary<string, AudioClip> _catch;
 
         private Coroutine _sequenceCoroutine;
 
         private List<AudioTrack> _trackLists;
 
-        private T _settings;
+        private AudioControllerSettings _settings;
 
         private EventSubscriberLocal<GameEvent> _eventSubscriberLocal;
 
         private AudioTrack _commonAudioTrack;
-        public override void Install(T a)
-        {
-            base.Install(a);
 
-            _settings = a as T;
+
+        public AudioController(AudioControllerSettings settings) : base(settings)
+        {
+            _settings = settings;
 
             _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents);
 
@@ -114,10 +114,8 @@ namespace JTI.Scripts.GameControllers
                 Debug.LogError("No audio data was set !");
                 return;
             }
-
         }
-
-        protected override void CreateView()
+        protected override void CreateWrapper()
         {
             View = new GameObject(nameof(AudioControllerView))
                 .AddComponent<AudioControllerView>();

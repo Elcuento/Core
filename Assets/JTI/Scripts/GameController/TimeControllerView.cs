@@ -1,12 +1,15 @@
+using System;
 using UnityEngine;
 
 namespace JTI.Scripts.GameControllers
 {
-    public class TimeControllerView : MonoBehaviour
+    public class TimeControllerView : GameControllerWrapper
     {
-        public virtual void Initialize<T, TU>(TU settings) where TU : GameControllerSettings where T : GameController<TU>
+        public Action OnTickUpdate;
+
+        public void Update()
         {
-         
+            OnTickUpdate?.Invoke();
         }
     }
 }

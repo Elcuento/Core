@@ -25,16 +25,28 @@ namespace JTI.Scripts.Managers
 
         }
 
-        public List<GameControllerView> GameControllers { get; private set; }
+        public List<GameControllerWrapper> GameControllers { get; private set; }
         public List<GameServiceBase> GameServices { get; private set; }
 
         public EventManagerLocal<GameEvent> GameEvents { get; private set; }
 
-        public void InstallController<T, TU>() where TU : GameControllerSettings where T : GameController<TU>, new()
+        /*   public void InstallController(GameControllerWrapper a)
+           {
+               try
+               {
+                   a.Initialize<>();
+                   GameControllers.Add(a);
+               }
+               catch (Exception e)
+               {
+                   Debug.LogError("Error on install controller " + a.GetType().Name + "\n" + e);
+               }
+           }*/
+        public T InstallController<T>(GameControllerWrapper view, T controller) where T : GameController
         {
             try
             {
-                var controller = new T();
+                controller.SetWrapper(view);
                 var wrapper = controller.View;
                 controller.Install();
                 GameControllers.Add(wrapper);
@@ -43,34 +55,23 @@ namespace JTI.Scripts.Managers
             {
                 Debug.LogError("Error on install controller " + typeof(T).Name + "\n" + e);
             }
-        }
-        
-     /*   public void InstallController(GameControllerWrapper a)
-        {
-            try
-            {
-                a.Initialize<>();
-                GameControllers.Add(a);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Error on install controller " + a.GetType().Name + "\n" + e);
-            }
-        }*/
 
-        public void InstallController<T, TU>(TU settings) where TU : GameControllerSettings where T : GameController<TU>, new()
+            return controller;
+        }
+        public T InstallController<T>(T controller) where T : GameController
         {
             try
             {
-                var controller = new T();
                 var wrapper = controller.View;
-                controller.Install(settings);
+                controller.Install();
                 GameControllers.Add(wrapper);
             }
             catch (Exception e)
             {
                 Debug.LogError("Error on install controller " + typeof(T).Name + "\n" + e);
             }
+
+            return controller;
         }
 
         public void InstallService<T, TU>(TU settings) where TU : GameServiceSettings where T : GameService<TU>
@@ -105,7 +106,7 @@ namespace JTI.Scripts.Managers
         {
             base.OnAwaken();
 
-            GameControllers = new List<GameControllerView>();
+            GameControllers = new List<GameControllerWrapper>();
             GameEvents = new EventManagerLocal<GameEvent>();
             GameServices = new List<GameServiceBase>();
         }
@@ -144,9 +145,9 @@ namespace JTI.Scripts.Managers
             }
         }
  
-        public TU GetController<TU, TE>() where TE : GameControllerSettings where TU : GameController<TE>
+        public TU GetController<TU>() where TU : GameController
         {
-            return null;//(TU)GameControllers.FirstOrDefault(x => x is TU);
+            return null;// (TU)GameControllers.FirstOrDefault(x => x is TU);
         }
 
         public TU GetService<TU,TE>() where TE : GameServiceSettings where TU : GameService<TE>
