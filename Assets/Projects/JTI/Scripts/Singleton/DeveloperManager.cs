@@ -60,14 +60,17 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                 button.onClick.AddListener(() => action?.Invoke());
                 button.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
 
-                var t = new GameObject("Text").AddComponent<Text>();
-                t.text = text;
-                t.resizeTextForBestFit = true;
-                t.transform.SetParent(button.transform);
-                t.color = Color.black;
-                t.font = Font;
-                t.alignment = TextAnchor.MiddleCenter;
-                var rec = t.GetComponent<RectTransform>();
+                var t = new GameObject("Text");
+                Text = t.AddComponent<Text>();
+                Text.text = text;
+                Text.resizeTextForBestFit = true;
+                Text.transform.SetParent(button.transform);
+                Text.color = Color.black;
+                Text.font = Font;
+                Text.alignment = TextAnchor.MiddleCenter;
+
+
+                var rec = Text.GetComponent<RectTransform>();
                 rec.anchorMax = new Vector2(1, 1);
                 rec.anchorMin = new Vector2(0, 0);
 
@@ -139,19 +142,19 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                 var im = _main.AddComponent<Image>();
                 im.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
 
-                var t = new GameObject("Text").AddComponent<Text>();
+                var t = new GameObject("Text");
 
-                Text = t;
+                Text = t.AddComponent<Text>();
 
-                t.text = txt;
-                t.resizeTextForBestFit = true;
-                t.transform.SetParent(im.transform);
-                t.color = Color.black;
-                t.font = Font;
-                t.alignment = TextAnchor.MiddleCenter;
+                Text.text = txt;
+                Text.resizeTextForBestFit = true;
+                Text.transform.SetParent(im.transform);
+                Text.color = Color.black;
+                Text.font = Font;
+                Text.alignment = TextAnchor.MiddleCenter;
                 im.raycastTarget = false;
-                t.raycastTarget = false;
-                var rec = t.GetComponent<RectTransform>();
+                Text.raycastTarget = false;
+                var rec = Text.GetComponent<RectTransform>();
                 rec.anchorMax = new Vector2(1, 1);
                 rec.anchorMin = new Vector2(0, 0);
 
