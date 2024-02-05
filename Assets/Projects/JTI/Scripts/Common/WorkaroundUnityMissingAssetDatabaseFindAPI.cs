@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
+#if UNITY_EDITOR
 namespace UnityEditorForks
 {
 	/// <summary>
@@ -230,3 +231,4 @@ namespace UnityEditorForks
 		}
 	}
 }
+#endif

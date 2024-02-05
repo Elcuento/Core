@@ -52,7 +52,6 @@ namespace JTI.Scripts
 
             RotateEvent?.Invoke(new Vector2(_clickHandler.Delta.x, _clickHandler.Delta.y));
 
-            Debug.Log("A");
           /* _xRotation -= mouseY;
            _xRotation = Mathf.Clamp(_xRotation, -90, 90f);
 
