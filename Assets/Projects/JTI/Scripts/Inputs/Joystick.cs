@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace Assets.Game.Scripts.Scenes.Game.Mono.Characters
+namespace JTI.Scripts
 {
     public class Joystick : MonoBehaviour
     {

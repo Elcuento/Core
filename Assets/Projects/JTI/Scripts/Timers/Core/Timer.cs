@@ -1,5 +1,4 @@
-﻿using Assets.Game;
-using JTI.Scripts.Managers;
+﻿using JTI.Scripts.Managers;
 using UnityEngine;
 
 namespace JTI.Scripts.Timers.Core

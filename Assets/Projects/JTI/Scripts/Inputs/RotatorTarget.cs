@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Assets.Game.Scripts.Scenes.Game.Mono.Characters
+namespace JTI.Scripts
 {
     public class RotatorTarget : MonoBehaviour
     {

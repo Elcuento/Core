@@ -77,7 +77,7 @@ namespace JTI.Scripts.Managers
             {
                 Setup(() =>
                 {
-                    var button = _main.AddComponent<Button>();
+                    var button = _main.AddComponent<UnityEngine.UI.Button>();
                     button.image = button.AddComponent<Image>();
                     button.onClick.AddListener(() => action?.Invoke());
                     button.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Assets.Game.Scripts.Scenes.Game.Mono.Characters
+namespace JTI.Scripts
 {
     public class ClickHandler : MonoBehaviour//,  IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
     {

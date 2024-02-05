@@ -1,8 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Assets.Game.Scripts.Scenes.Game.Mono.Characters
-{
+namespace JTI.Scripts{
     public class Button : MonoBehaviour
     {
         [SerializeField] private UnityEvent _eventPress;

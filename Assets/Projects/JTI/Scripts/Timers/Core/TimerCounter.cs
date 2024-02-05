@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Assets.Game;
 using UnityEngine;
 
 namespace JTI.Scripts.Timers.Core
