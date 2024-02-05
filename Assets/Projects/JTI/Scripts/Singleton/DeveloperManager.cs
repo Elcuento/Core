@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using JTI.Scripts.Managers;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 public class DeveloperManager : SingletonMono<DeveloperManager>
@@ -56,7 +56,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             Setup(() =>
             {
                 var button = _main.AddComponent<Button>();
-                button.image = button.AddComponent<Image>();
+                button.image = button.gameObject.AddComponent<Image>();
                 button.onClick.AddListener(() => action?.Invoke());
                 button.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
 
@@ -205,6 +205,11 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         CreateFont();
         Check();
         Show(false);
+
+        if (EventSystem.current == null)
+        {
+            Debug.LogError("No EventSystem in scene! Add it first");
+        }
     }
 
 
@@ -214,8 +219,8 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         {
             _canvas = new GameObject("Canvas").AddComponent<Canvas>();
             _canvas.transform.SetParent(transform);
-            _canvas.AddComponent<CanvasScaler>();
-            _canvas.AddComponent<GraphicRaycaster>();
+            _canvas.gameObject.AddComponent<CanvasScaler>();
+            _canvas.gameObject.AddComponent<GraphicRaycaster>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _canvas.sortingOrder = 9999;
         }

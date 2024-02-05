@@ -2,7 +2,7 @@ using JTI.Scripts.Managers;
 
 namespace JTI.Scripts
 {
-    public class GameManagerWrapperExample : GameManager
+    public class GameManagerWrapper : GameManager
     {
         protected override void InstallControllers()
         {
