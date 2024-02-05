@@ -5,32 +5,76 @@ using Assets.JTI.Scripts.Events.Game;
 using JTI.Scripts.Common;
 using JTI.Scripts.Events;
 using JTI.Scripts.Localization.Data;
-using JTI.Scripts.Managers;
-using Unity.VisualScripting;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace JTI.Scripts.GameControllers
 {
     [RequireComponent(typeof(AudioListener))]
-    public class AudioController : GameController
+    public class AudioController : GameControllerMono
     {
         [System.Serializable]
         public class AudioControllerSettings : GameControllerSettings
         {
-            public AudioData Data;
+            [SerializeField] private List<AudioVolume> _volumeByGroup;
+            [SerializeField] private AudioData _data;
+            [SerializeField] private bool _preLoad;
+            [SerializeField] private float _volumeMultiply = 1;
 
-            public bool PreLoad;
-            public Dictionary<int, float> GroupVolume;
-            public float VolumeMultiply;
+            public AudioData Data => _data;
+            public bool PreLoad => _preLoad;
+            public float VolumeMultiply => _volumeMultiply;
 
+
+            [System.Serializable]
+            public class AudioVolume
+            {
+                public float Volume;
+                public int Group;
+            }
+
+            public void SetVolumeMultiply(float volume)
+            {
+                _volumeMultiply = volume;
+            }
+            public AudioVolume GetVolumeByGroup(int group)
+            {
+                if (_volumeMap.ContainsKey(group))
+                {
+                    return _volumeMap[group];
+                }
+                else
+                {
+                    var v = _volumeByGroup.Find(x => x.Group == group);
+                    if (v != null)
+                    {
+                        _volumeMap.Add(v.Group, v);
+                    }
+                    else
+                    {
+                        _volumeMap.Add(group, new AudioVolume() { Volume = 1, Group = group });
+                    }
+
+                    return _volumeMap[group];
+                }
+            }
+
+            private Dictionary<int, AudioVolume> _volumeMap;
+
+
+            public AudioControllerSettings()
+            {
+                _volumeByGroup = new List<AudioVolume>();
+                _volumeMap = new Dictionary<int, AudioVolume>();
+                _volumeMultiply = 1;
+            }
             public AudioControllerSettings(AudioData d)
             {
-                Data = d;
-                GroupVolume = new Dictionary<int, float>()
-                {
-                    { -1, 1 }
-                };
+                _data = d;
+
+                _volumeMultiply = 1;
+                _volumeMap = new Dictionary<int, AudioVolume>();
+                _volumeByGroup = new List<AudioVolume>();
             }
         }
 
@@ -45,17 +89,83 @@ namespace JTI.Scripts.GameControllers
             public float Multiply { get; private set; }
             public bool DoNotDestroy { get; private set; }
             public AudioClipData Data { get; private set; }
-
             public AudioController Controller { get; private set; }
 
+            private float _from;
+            private float _to;
+
             private bool _isDestroyed;
+            private bool _destroyAfterPlay;
+            private bool _controlPlay;
+
+            private Coroutine _playCoroutine;
+
             public void PlayOneShot(AudioClip clip, float volumeMultiply = 1)
             {
                 if (IsDestroyed) return;
 
                 Source.PlayOneShot(clip, volumeMultiply);
             }
-            public AudioTrack(AudioController c, string id, AudioSource source, AudioClipData data, int group = 1, bool doNotDestroy = false, float multiply = 1)
+
+
+            private IEnumerator PlayAudioWithControl()
+            {
+                Source.time = _from;
+                Source.Play();
+
+                while (IsPlaying)
+                {
+                    yield return null;
+
+                    if (_to != -1)
+                    {
+                        if (Source.time >= _to)
+                        {
+                            Stop();
+                            yield break;
+                        }
+                    }
+                }
+
+                Stop();
+            }
+
+
+            public void Stop()
+            {
+                if (_playCoroutine != null)
+                {
+                    Controller.StopCoroutine(_playCoroutine);
+                }
+
+                Source.Stop();
+
+                if (_destroyAfterPlay)
+                {
+                    Destroy();
+                }
+            }
+
+            public void Play()
+            {
+                if (_controlPlay)
+                {
+                    if (_playCoroutine != null)
+                    {
+                        Controller.StopCoroutine(_playCoroutine);
+                    }
+
+                    _playCoroutine = Controller.StartCoroutine(PlayAudioWithControl());
+                }
+                else
+                {
+                    Source.Play();
+                }
+
+            }
+
+            public AudioTrack(AudioController c, string id, AudioSource source, AudioClipData data, int group = 1, bool doNotDestroy = false, float multiply = 1,
+                float from =0, float to=-1, bool destroyAfterPlay = false)
             {
                 Group = group;
                 Id = id;
@@ -64,8 +174,18 @@ namespace JTI.Scripts.GameControllers
                 DoNotDestroy = doNotDestroy;
                 Multiply = multiply;
                 Data = data;
-            }
 
+                _from = from;
+                _to = to;
+
+                _destroyAfterPlay = destroyAfterPlay;
+
+                if (_from != 0 || _to != -1 || _destroyAfterPlay)
+                {
+                    _controlPlay = true;
+                }
+
+            }
             internal void DestroyInternal()
             {
                 if (!IsDestroyed) return;
@@ -90,43 +210,28 @@ namespace JTI.Scripts.GameControllers
             }
         }
 
+        [SerializeField] private AudioControllerSettings _settings;
+
+        private Action _onUpdateEvent;
+
         private Dictionary<string, AudioClip> _catch;
 
         private Coroutine _sequenceCoroutine;
 
         private List<AudioTrack> _trackLists;
 
-        private AudioControllerSettings _settings;
-
         private EventSubscriberLocal<GameEvent> _eventSubscriberLocal;
 
         private AudioTrack _commonAudioTrack;
 
-
-        public AudioController(AudioControllerSettings settings) : base(settings)
+        protected override void OnInstall()
         {
-            _settings = settings;
-
-            _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents);
-
-            if (_settings == null || _settings.Data == null)
-            {
-                Debug.LogError("No audio data was set !");
-                return;
-            }
-        }
-        protected override void CreateWrapper()
-        {
-            View = new GameObject(nameof(AudioControllerView))
-                .AddComponent<AudioControllerView>();
-        }
-
-        protected override void OnInitialize()
-        {
-            _commonAudioTrack = CreateTrack("AudioSource_" + Guid.NewGuid(),-1,true);
-
             _trackLists = new List<AudioTrack>();
             _catch = new Dictionary<string, AudioClip>();
+
+            _commonAudioTrack = CreateTrack("AudioSource_" + Guid.NewGuid(), -1, true);
+
+            _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(Manager.GameEvents);
 
             Subscribe();
 
@@ -134,9 +239,14 @@ namespace JTI.Scripts.GameControllers
             UpdateSettings();
         }
 
+        private void Update()
+        {
+            _onUpdateEvent?.Invoke();
+        }
+
         private void PreLoad()
         {
-            View.StartCoroutine(_loadAsync());
+            StartCoroutine(_loadAsync());
         }
 
         private IEnumerator _loadAsync()
@@ -200,10 +310,11 @@ namespace JTI.Scripts.GameControllers
 
             foreach (var f in data.GroupOnChangeVolume)
             {
-                if (_settings.GroupVolume.ContainsKey(f.Key))
+                if (data.GroupOnChangeVolume.ContainsKey(f.Key))
                 {
-                    _settings.GroupVolume[f.Key] = f.Value;
+                    data.GroupOnChangeVolume[f.Key] = data.GroupOnChangeVolume[f.Key];
                 }
+
             }
 
             UpdateSettings();
@@ -253,7 +364,7 @@ namespace JTI.Scripts.GameControllers
 
         public void SetVolumeMultiply(float a)
         {
-            _settings.VolumeMultiply = a;
+            _settings.SetVolumeMultiply(a);
 
             UpdateSettings();
         }
@@ -273,6 +384,11 @@ namespace JTI.Scripts.GameControllers
             _catch.Add(clip.name, clip);
 
             return clip;
+        }
+
+        public void PlayCoroutine(Coroutine aCoroutine)
+        {
+            
         }
         private IEnumerator PlayTrackSequenceCor(List<string> random, int group, bool loop, string start, string final)
         {
@@ -329,9 +445,9 @@ namespace JTI.Scripts.GameControllers
         public void AddAndPlayTrackSequence(List<string> random, int group = 0, bool loop = true, string start = "", string final = "")
         {
             if (_sequenceCoroutine != null)
-                View.StopCoroutine(_sequenceCoroutine);
+                StopCoroutine(_sequenceCoroutine);
 
-            _sequenceCoroutine = View.StartCoroutine(PlayTrackSequenceCor(random, group, loop, start, final));
+            _sequenceCoroutine = StartCoroutine(PlayTrackSequenceCor(random, group, loop, start, final));
         }
 
         public void PlayOneShot3D(string id, Vector3 pos)
@@ -364,6 +480,18 @@ namespace JTI.Scripts.GameControllers
                 Object.Destroy(go, clip.length);
             }
         }
+
+        public void PlayOneShotInOnTime(string id, float multiply, float start =- 1, float end = -1)
+        {
+            var clip = GetClip(id);
+            var data = GetAudioData(clip?.name);
+
+            if (clip != null)
+            {
+                _commonAudioTrack.PlayOneShot(clip, multiply * (data?.Volume ?? 1));
+            }
+        }
+
         public void PlayOneShot3D(string id, Transform tr)
         {
 
@@ -449,32 +577,29 @@ namespace JTI.Scripts.GameControllers
 
             if (clip != null)
             {
-                View.StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply, unscaled, delay));
+                StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply * (data?.Volume ?? 1), unscaled, delay));
             }
         }
 
         public void PlayOneShotDelay(string id, float delay = 0, float multiply = 1, bool unscaled = false)
         {
             var clip = GetClip(id);
+            var data = GetAudioData(clip?.name);
 
             if (clip != null)
             {
-                View.StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply, unscaled, delay));
+                StartCoroutine(DelayUnscaledPlayOneShot(clip, multiply * (data?.Volume ?? 1), unscaled, delay));
             }
         }
 
         public float GetVolumeByGroup(int a)
         {
-            if (_settings.GroupVolume.ContainsKey(a))
-            {
-                return _settings.GroupVolume[a];
-            }
-            else return 1;
+            return _settings.GetVolumeByGroup(a).Volume;
         }
 
         public AudioTrack CreateTrack(string id, int group, bool loop = false, bool donNotDestroy = false)
         {
-            var source = View.AddComponent<AudioSource>();
+            var source = gameObject.AddComponent<AudioSource>();
 
             var data = GetAudioData(id);
 
@@ -496,11 +621,11 @@ namespace JTI.Scripts.GameControllers
 
             if (rebuild)
             {
-                a.Source.Play();
+                a.Play();
             }
             else if (!a.Source.isPlaying)
             {
-                a.Source.Play();
+               a.Play();
             }
         }
 
@@ -524,7 +649,7 @@ namespace JTI.Scripts.GameControllers
 
         public void RemoveListener()
         {
-            var l = View.GetComponent<AudioListener>();
+            var l = GetComponent<AudioListener>();
             if (l != null)
             {
                 Object.Destroy(l);
@@ -533,10 +658,10 @@ namespace JTI.Scripts.GameControllers
 
         public void AddListener()
         {
-            var l = View.GetComponent<AudioListener>();
+            var l = GetComponent<AudioListener>();
             if (l == null)
             {
-                View.gameObject.AddComponent<AudioListener>();
+                gameObject.AddComponent<AudioListener>();
             }
         }
     }

@@ -1,22 +1,16 @@
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Net;
 using Assets.JTI.Scripts.Events.Game;
-using DG.Tweening;
 using JTI.Scripts.Events;
 using JTI.Scripts.GameControllers;
-using JTI.Scripts.Localization.Data;
 using JTI.Scripts.Storage;
-using JTI.Scripts.Timers.Core;
-using UnityEngine;
 
 namespace JTI.Scripts.Managers
 {
 
-
     public class ProfileController : GameController
     {
+        public ProfileController() { }
+
         [System.Serializable]
         public class ProfileControllerSettings : GameControllerSettings
         {
@@ -34,7 +28,23 @@ namespace JTI.Scripts.Managers
 
         private FileStorageString _storage;
 
- 
+        protected override void OnInstall()
+        {
+            GameEvents = new EventManagerLocal<ProfileEvent>();
+
+            _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(Manager.GameEvents);
+
+            _storage = new FileStorageString();
+            _storage.SetAutosave(_settings.Autosave);
+        }
+
+        public ProfileController SetSettings(ProfileControllerSettings a)
+        {
+            _settings = a;
+
+            return this;
+        }
+
         public void Get(Enum a, object def)
         {
             _storage.LoadDefault(a.ToString(), def);
@@ -55,18 +65,6 @@ namespace JTI.Scripts.Managers
            return _storage.IsExist(a.ToString());
         }
 
-        public ProfileController(ProfileControllerSettings s) : base(s)
-        {
-            _settings = s;
-
-            GameEvents = new EventManagerLocal<ProfileEvent>();
-
-            _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents);
-
-            _storage = new FileStorageString();
-            _storage.SetAutosave(_settings.Autosave);
-        }
-
         protected override void OnInitialize()
         {
             base.OnInitialize();
@@ -74,7 +72,7 @@ namespace JTI.Scripts.Managers
             Load();
 
         } 
-        void Save()
+        public void Save()
         {
             _storage.Save();
         }

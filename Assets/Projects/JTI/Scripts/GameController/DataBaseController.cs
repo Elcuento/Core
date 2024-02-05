@@ -10,12 +10,18 @@ namespace JTI.Scripts.Managers
 
     public class DataBaseController : GameController
     {
+        public DataBaseController()
+        {
+
+        }
+
         [System.Serializable]
-        public class DataBaseControllerSettings : GameController.GameControllerSettings
+        public class DataBaseControllerSettings : GameControllerSettings
         {
             public List<DataBase> DataBases = new List<DataBase>();
             public string Path;
 
+            public DataBaseControllerSettings(){}
             public DataBaseControllerSettings(string path, List<DataBase> data)
             {
                 Path = path;
@@ -31,25 +37,21 @@ namespace JTI.Scripts.Managers
 
         private Dictionary<string, DataBase> _data;
 
-        public DataBaseController(DataBaseControllerSettings settings) : base(settings)
+
+        protected override void OnInstall()
         {
             _data = new Dictionary<string, DataBase>();
 
-            foreach (var settingsDataBase in settings.DataBases)
+            foreach (var settingsDataBase in _settings.DataBases)
             {
                 settingsDataBase.Init();
             }
         }
-
-        public class DataBaseControllerView : GameControllerWrapper
+        public GameController SetSettings(DataBaseControllerSettings a)
         {
-            public string A;
-        }
+            _settings = a;
 
-        protected override void CreateWrapper()
-        {
-            View = new GameObject(GetType().Name)
-                .AddComponent<DataBaseControllerView>();
+            return this;
         }
 
         public static T LoadData<T>(string path) where T : DataBase

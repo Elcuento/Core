@@ -32,11 +32,10 @@ namespace JTI.Scripts.Managers
 
         private FileStorageString _storage;
 
-        public CounterController(CounterControllerSettings s) : base(s)
+
+        protected override void OnInstall()
         {
             Timers = new List<Timer>();
-            
-            _settings = s;
 
             _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents);
         }

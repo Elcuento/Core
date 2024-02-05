@@ -17,11 +17,6 @@ namespace JTI.Scripts.Managers
 
                 if (_isApplicationQuiting || _isDestroyed) return null;
 
-                if (_settings == null)
-                {
-                    _settings = new TS();
-                }
-
                 if (_instance != null)
                     return _instance;
 
@@ -48,6 +43,15 @@ namespace JTI.Scripts.Managers
 
                 return _instance;
             }
+            private set => Constructor();
+        }
+
+        private static void Constructor()
+        {
+            if (_settings == null)
+            {
+                _settings = new TS();
+            }
         }
 
         protected void Awake()
@@ -55,6 +59,8 @@ namespace JTI.Scripts.Managers
             if (_instance == null)
             {
                 _instance = this as T;
+
+                Constructor();
 
                 if (_settings.IsDontDestroyOnLoad)
                 {

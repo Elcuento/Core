@@ -6,14 +6,13 @@ using Assets.JTI.Scripts.Events.Game;
 using DG.Tweening;
 using JTI.Scripts.Events;
 using JTI.Scripts.GameControllers;
-using JTI.Scripts.Localization.Data;
 using JTI.Scripts.Timers.Core;
 using UnityEngine;
 
 namespace JTI.Scripts.Managers
 {
 
-    public class TimeController : GameController
+    public class TimeController : GameControllerMono
     {
         [System.Serializable]
         public class TimeControllerSettings : GameControllerSettings
@@ -49,12 +48,9 @@ namespace JTI.Scripts.Managers
 
         private TimeControllerSettings _settings;
 
-
-        public TimeController(TimeControllerSettings s) : base(s)
+        protected override void OnInstall()
         {
             Timers = new List<Timer>();
-
-            _settings = s;
 
             _currentTimeScale = 1;
 
@@ -66,17 +62,14 @@ namespace JTI.Scripts.Managers
 
             _physicDelta = Time.fixedDeltaTime;
 
-
         }
-
-        protected override void CreateWrapper()
+        public TimeController SetSettings(TimeControllerSettings a)
         {
-            View = new GameObject(GetType().Name)
-                .AddComponent<TimeControllerView>();
+            _settings = a;
 
-            var v = (TimeControllerView)View;
-            v.OnTickUpdate += Update;
+            return this;
         }
+
 
         public void SetPause(bool pause)
         {

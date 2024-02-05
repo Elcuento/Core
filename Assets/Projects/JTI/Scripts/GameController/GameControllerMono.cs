@@ -6,44 +6,46 @@ namespace JTI.Scripts.GameControllers
 {
 
 
-    public abstract class GameController : GameManager.IController
+    public abstract class GameControllerMono : MonoBehaviour, GameManager.IController
     {
-        protected GameController() { }
         public GameManager Manager { get; private set; }
 
-        protected bool _installed;
+        protected GameControllerSettings Settings;
 
+        [System.Serializable]
         public class GameControllerSettings
         {
 
         }
 
+        protected void Awake()
+        {
+         
+        }
+
+        public void Install()
+        {
+            OnInstall();
+        }
+
+        public void Install(GameController.GameControllerSettings a)
+        {
+            
+        }
+
+        public void Initialize()
+        {
+            OnInitialize();
+        }
 
         public void SetManager(GameManager manager)
         {
             Manager = manager;
         }
 
-        public GameController SetSettings(GameControllerSettings a)
+        public GameControllerMono SetSettings()
         {
             return this;
-        }
-
-        public GameController SetSettings()
-        {
-            return this;
-        }
-
-        public void Install()
-        {
-            _installed = true;
-
-            OnInstall();
-        }
-
-        public void Initialize()
-        {
-            OnInitialize();
         }
 
         public void LateInitialize()
@@ -53,13 +55,14 @@ namespace JTI.Scripts.GameControllers
 
         public void Destroy()
         {
-        
+            Destroy(gameObject);
         }
 
         public void OnDestroy()
         {
             OnOnDestroy();
         }
+
         protected virtual void OnInitialize()
         {
 
@@ -78,6 +81,5 @@ namespace JTI.Scripts.GameControllers
         {
 
         }
-
     }
 }

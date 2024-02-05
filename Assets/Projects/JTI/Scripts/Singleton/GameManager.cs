@@ -1,173 +1,131 @@
 using System;
-using JTI.Scripts.GameControllers;
 using System.Collections.Generic;
-using System.Linq;
 using Assets.JTI.Scripts.Events.Game;
 using JTI.Scripts.Events;
+using JTI.Scripts.GameControllers;
 using JTI.Scripts.GameServices;
 using UnityEngine;
 
 namespace JTI.Scripts.Managers
 {
-    public class SingletonSettingsGameManager : SingletonSettings
+    public class GameManager : SingletonMonoSimple<GameManager>
     {
-        public override bool IsAutoLoaded { get; set; } = true;
-        public override bool IsAutoCreated { get; set; } = true;
-        public override bool IsDontDestroyOnLoad { get; set; } = true;
-
-        public override string AutoLoadedPath => $"{Application.persistentDataPath}/Game/Prefabs/Singleton/";
-    }
-
-    public class GameManager : Singleton<GameManager, SingletonSettingsGameManager>
-    {
-        public class GameManagerSettings
+        public interface IController
         {
-
+            public void Install();
+            public void SetManager(GameManager manager);
+            public void Initialize();
+            public void LateInitialize();
+            public void Destroy();
         }
 
-        public List<GameControllerWrapper> GameControllers { get; private set; }
-        public List<GameServiceBase> GameServices { get; private set; }
+        [SerializeField] private GameControllerMono[] _controllersToInstall;
 
+        public List<IController> GameControllers { get; private set; }
+        public List<GameServiceBase> GameServices { get; private set; }
         public EventManagerLocal<GameEvent> GameEvents { get; private set; }
 
-        /*   public void InstallController(GameControllerWrapper a)
-           {
-               try
-               {
-                   a.Initialize<>();
-                   GameControllers.Add(a);
-               }
-               catch (Exception e)
-               {
-                   Debug.LogError("Error on install controller " + a.GetType().Name + "\n" + e);
-               }
-           }*/
-        public T InstallController<T>(GameControllerWrapper view, T controller) where T : GameController
+        private bool IsMonoBehavior<T>()
         {
-            try
+            var type = typeof(T);
+            while (type != null )
             {
-                controller.SetWrapper(view);
-                var wrapper = controller.View;
-                controller.Install();
-                GameControllers.Add(wrapper);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Error on install controller " + typeof(T).Name + "\n" + e);
-            }
+                if(type == typeof(MonoBehaviour)) return true;
 
-            return controller;
-        }
-        public T InstallController<T>(T controller) where T : GameController
-        {
-            try
-            {
-                var wrapper = controller.View;
-                controller.Install();
-                GameControllers.Add(wrapper);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Error on install controller " + typeof(T).Name + "\n" + e);
-            }
+                if (type.BaseType == null ) return false;
 
-            return controller;
+                type = type.BaseType;
+            }
+            return false;
         }
 
-        public void InstallService<T, TU>(TU settings) where TU : GameServiceSettings where T : GameService<TU>
+        public T AddController<T>() where T : IController, new()
         {
-            try
+            if (IsMonoBehavior<T>())
             {
-                var c = new GameObject(typeof(T).Name).AddComponent<T>();
-                c.Install(settings);
-                GameServices.Add(c);
+                var a = new GameObject(typeof(T).Name);
+                a.transform.SetParent(transform);
+                var s = (a.AddComponent(typeof(T))) as IController;
+
+                s.SetManager(this);
+                GameControllers.Add(s);
+                return (T)s;
             }
-            catch (Exception e)
-            {
-                Debug.LogError("Error on install service " + typeof(T).Name + "\n" + e);
-            }
+
+            var b = new T();
+            b.SetManager(this);
+            GameControllers.Add(b);
+            return b;
         }
 
-        public void InstallService<T, TU>() where TU : GameServiceSettings where T : GameService<TU>
+        public T AddController<T>(T c) where T : MonoBehaviour, IController
         {
-            try
-            {
-                var c = new GameObject(typeof(T).Name).AddComponent<T>();
-                c.Install(default(TU));
-                GameServices.Add(c);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Error on install service " + typeof(T).Name + "\n" + e);
-            }
+            c.SetManager(this);
+            GameControllers.Add(c);
+            return c;
         }
 
-        protected override void OnAwaken()
+        protected sealed override void OnAwaken()
         {
-            base.OnAwaken();
+            DontDestroyOnLoad(gameObject);
 
-            GameControllers = new List<GameControllerWrapper>();
+            GameControllers = new List<IController>();
             GameEvents = new EventManagerLocal<GameEvent>();
             GameServices = new List<GameServiceBase>();
+
+            Initialize();
         }
 
-        public virtual void Install<T>() where T : GameManagerSettings
+        protected virtual void InstallControllers()
         {
-
+           
         }
 
-        public void Initialize()
+        private void Initialize()
         {
-            InitializeServices();
+            InstallSettingsControllers();
+
+            InstallControllers();
+
             InitializeControllers();
+
+            OnInitialize();
 
             LateInitialize();
         }
 
         private void LateInitialize()
         {
-            LateInitializeServices();
             LateInitializeControllers();
+
+            OnLateInitialize();
 
             InitializeFinish();
         }
 
         private void InitializeFinish()
         {
-
+            OnInitializeFinish();
         }
-
-        private void InitializeServices()
+        private void InstallSettingsControllers()
         {
-            foreach (var service in GameServices)
+            foreach (var controller in _controllersToInstall)
             {
-                service.Initialize();
-            }
-        }
- 
-        public TU GetController<TU>() where TU : GameController
-        {
-            return null;// (TU)GameControllers.FirstOrDefault(x => x is TU);
-        }
+                if (controller == null) continue;
 
-        public TU GetService<TU,TE>() where TE : GameServiceSettings where TU : GameService<TE>
-        {
-            return (TU)GameServices.FirstOrDefault(x => x is TU);
-        }
-
-        private void LateInitializeServices()
-        {
-            foreach (var service in GameServices)
-            {
-                service.LateInitialize();
+                AddController(controller)
+                    .SetSettings()
+                    .Install();
             }
+
+            _controllersToInstall = null;
         }
 
         private void InitializeControllers()
         {
             foreach (var gameController in GameControllers)
             {
-               // gameController.Initialize();
+                gameController.Initialize();
             }
 
         }
@@ -175,8 +133,24 @@ namespace JTI.Scripts.Managers
         {
             foreach (var gameController in GameControllers)
             {
-               // gameController.LateInitialize();
+                gameController.LateInitialize();
             }
         }
+
+        public virtual void OnInitialize()
+        {
+
+        }
+
+        public virtual void OnLateInitialize()
+        {
+
+        }
+
+        public virtual void OnInitializeFinish()
+        {
+
+        }
+
     }
 }
