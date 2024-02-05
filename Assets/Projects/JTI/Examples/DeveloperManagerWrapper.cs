@@ -6,22 +6,23 @@ public class DeveloperManagerWrapper : DeveloperManager
 {
     protected override void Main()
     {
-        var c = AddText("Scene : ");
-
-        c.SetUpdate(() =>
-        {
-            c.Text.text = "Scene : " + SceneManager.GetActiveScene().name;
-        });
 
         OpenPage(new List<DeveloperItem>()
         {
-            c,
+            AddText("Scene : "),
+
             AddButton("Just button ", () =>
             {
                 Debug.Log("I am just a button after all..");
             }),
+
             AddButton("Page 1", Page1),
-            AddButton("Page 2", Page2)
+            AddButton("Page 2", Page1),
+
+            AddInputField("Page 2", onUpdate: (b) =>
+            {
+                b.InputField.text = Random.Range(0, 99).ToString();
+            })
         });
     }
 

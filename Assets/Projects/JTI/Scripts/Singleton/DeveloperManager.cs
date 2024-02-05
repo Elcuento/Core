@@ -11,7 +11,6 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     {
         protected GameObject _main;
         private Action _createAction;
-        private Action _updateAction;
 
         public Settings _settings;
 
@@ -22,13 +21,9 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             _main.transform.SetParent(c);
         }
 
-        public void SetUpdate(Action ac)
-        {
-            _updateAction = ac;
-        }
         public virtual void OnUpdate()
         {
-            _updateAction?.Invoke();
+           
         }
 
         public virtual void Create()
@@ -50,21 +45,26 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     public class DeveloperButton : DeveloperItem
     {
+        private Action<DeveloperButton> _updateAction;
+        private Button _button;
         public Text Text;
-        public DeveloperButton(Settings s, Transform c, string text, Action action) : base(s, c)
+
+        public DeveloperButton(Settings s, Transform c, string text, Action action, Action<DeveloperButton> onUpdate = null) : base(s, c)
         {
             Setup(() =>
             {
-                var button = _main.AddComponent<Button>();
-                button.image = button.gameObject.AddComponent<Image>();
-                button.onClick.AddListener(() => action?.Invoke());
-                button.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
+                _updateAction = onUpdate;
+
+                _button = _main.AddComponent<Button>();
+                _button.image = _button.gameObject.AddComponent<Image>();
+                _button.onClick.AddListener(() => action?.Invoke());
+                _button.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
 
                 var t = new GameObject("Text");
                 Text = t.AddComponent<Text>();
                 Text.text = text;
                 Text.resizeTextForBestFit = true;
-                Text.transform.SetParent(button.transform);
+                Text.transform.SetParent(_button.transform);
                 Text.color = Color.black;
                 Text.font = Font;
                 Text.alignment = TextAnchor.MiddleCenter;
@@ -83,18 +83,25 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                 }
 
             });
+            _updateAction = onUpdate;
         }
 
-
+        public override void OnUpdate()
+        {
+            _updateAction?.Invoke(this);
+        }
     }
 
     public class DeveloperInput : DeveloperItem
     {
         public InputField InputField;
-        public DeveloperInput(Settings s, Transform c, string txt, Action<string> a) : base(s, c)
+        private Action<DeveloperInput> _onUpdate;
+        public DeveloperInput(Settings s, Transform c, string txt, Action<string> a, Action<DeveloperInput> onUpdate) : base(s, c)
         {
             Setup(() =>
             {
+                _onUpdate = onUpdate;
+
                 var im = _main.AddComponent<Image>();
                 InputField = _main.AddComponent<InputField>();
 
@@ -130,15 +137,25 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                 }
             });
         }
+
+        public override void OnUpdate()
+        {
+            _onUpdate?.Invoke(this);
+        }
     }
 
     public class DeveloperText : DeveloperItem
     {
         public Text Text;
-        public DeveloperText(Settings s, Transform c, string txt, bool keepOnScreen = false) : base(s, c)
+
+        private Action<DeveloperText> _onUpdate;
+
+        public DeveloperText(Settings s, Transform c, string txt, bool keepOnScreen = false, Action<DeveloperText> onUpdate = null) : base(s, c)
         {
             Setup(() =>
             {
+                _onUpdate = onUpdate;
+
                 var im = _main.AddComponent<Image>();
                 im.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
 
@@ -166,6 +183,11 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                     _main.AddComponent<CanvasGroup>().alpha = 0;
                 }
             });
+        }
+
+        public override void OnUpdate()
+        {
+            _onUpdate?.Invoke(this);
         }
     }
     public enum ContainerPosition
@@ -253,14 +275,14 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         return c.transform;
     }
 
-    protected DeveloperItem CreateFps()
+ /*   protected DeveloperItem CreateFps()
     {
         var b = AddText("Fps : ", ContainerPosition.Middle);
 
         b.SetUpdate(() => { b.Text.text = "Fps : " + PerformanceManager.Instance.AverageFps; });
 
         return b;
-    }
+    }*/
 
     protected void ShowMinimize()
     {
@@ -273,10 +295,10 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     {
         var c = AddText("Scene : ");
 
-        c.SetUpdate(() =>
-        {
-            c.Text.text = "Scene : " + SceneManager.GetActiveScene().name;
-        });
+       OpenPage(new List<DeveloperItem>()
+       {
+           AddText("Welcome")
+       });
 
     }
 
@@ -317,21 +339,21 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         _items = list;
     }
 
-    protected DeveloperInput AddInputField(string text, ContainerPosition pos = ContainerPosition.Left, Action<string> a = null)
+    protected DeveloperInput AddInputField(string text, ContainerPosition pos = ContainerPosition.Left, Action<string> a = null, Action<DeveloperInput> onUpdate = null)
     {
-        var b = new DeveloperInput(new Settings(), _containers[pos].transform, text, a);
+        var b = new DeveloperInput(new Settings(), _containers[pos].transform, text, a, onUpdate);
 
         return b;
     }
-    protected DeveloperButton AddButton(string text, Action a = null, ContainerPosition pos = ContainerPosition.Left)
+    protected DeveloperButton AddButton(string text, Action a = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperButton> onUpdate = null)
     {
-        var b = new DeveloperButton(new Settings(), _containers[pos].transform, text, a);
+        var b = new DeveloperButton(new Settings(), _containers[pos].transform, text, a, onUpdate: onUpdate);
 
         return b;
     }
-    protected DeveloperText AddText(string text, ContainerPosition pos = ContainerPosition.Left)
+    protected DeveloperText AddText(string text, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperText> onUpdate = null)
     {
-        var b = new DeveloperText(new Settings(), _containers[pos].transform, text);
+        var b = new DeveloperText(new Settings(), _containers[pos].transform, text, onUpdate: onUpdate);
 
         return b;
     }
