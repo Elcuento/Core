@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class DeveloperManagerWrapper : DeveloperManager
 {
@@ -9,7 +8,10 @@ public class DeveloperManagerWrapper : DeveloperManager
 
         OpenPage(new List<DeveloperItem>()
         {
-            AddText("Scene : "),
+            AddText("Just text", onUpdate: (b) =>
+            {
+                b.Text.text = Random.Range(0, 99).ToString();
+            }),
 
             AddButton("Just button ", () =>
             {
@@ -19,9 +21,9 @@ public class DeveloperManagerWrapper : DeveloperManager
             AddButton("Page 1", Page1),
             AddButton("Page 2", Page1),
 
-            AddInputField("Page 2", onUpdate: (b) =>
+            AddInputField("Page 2", a: (a) =>
             {
-                b.InputField.text = Random.Range(0, 99).ToString();
+                Debug.Log(a);
             })
         });
     }
