@@ -117,10 +117,8 @@ namespace JTI.Scripts
             var dist = Vector3.Distance(_handler.transform.position, transform.position);
 
             if (dist > _deathZone)
-                Axis = dir * dist / _range;
+                Axis = dir.normalized * max;
             else Axis = Vector2.zero;
-
-            Axis = dir.normalized * max;
 
             MoveEvent?.Invoke(Axis);
         }
