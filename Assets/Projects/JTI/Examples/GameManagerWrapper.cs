@@ -1,6 +1,6 @@
 using JTI.Scripts.Managers;
 
-namespace JTI.Scripts
+namespace JTI.Examples
 {
     public class GameManagerWrapper : GameManager
     {

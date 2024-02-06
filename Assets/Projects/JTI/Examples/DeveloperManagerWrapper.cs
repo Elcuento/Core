@@ -1,77 +1,61 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DeveloperManagerWrapper : DeveloperManager
+namespace JTI.Examples
 {
-    protected override void Main()
+    public class DeveloperManagerWrapper : DeveloperManager
     {
-
-        OpenPage(new List<DeveloperItem>()
+        protected override void Main()
         {
-            AddText("Just text", onUpdate: (b) =>
+
+            OpenPage(new List<DeveloperItem>()
             {
-                b.Text.text = Random.Range(0, 99).ToString();
-            }),
+                AddText("Just text", onUpdate: (b) => { b.Text.text = Random.Range(0, 99).ToString(); }),
 
-            AddButton("Just button ", () =>
-            {
-                Debug.Log("I am just a button after all..");
-            }),
+                AddButton("Just button ", () => { Debug.Log("I am just a button after all.."); }),
 
-            AddButton("Page 1", Page1),
-            AddButton("Page 2", Page1),
+                AddButton("Page 1", Page1),
+                AddButton("Page 2", Page1),
 
-            AddInputField("Page 2", a: (a) =>
-            {
-                Debug.Log(a);
-            })
-        });
-    }
+                AddInputField("Page 2", a: (a) => { Debug.Log(a); })
+            });
+        }
 
-    private void Page1()
-    {
-
-        OpenPage(new List<DeveloperItem>()
+        private void Page1()
         {
-            AddInputField("Input some ", a: (str) =>
+
+            OpenPage(new List<DeveloperItem>()
             {
-                Debug.Log("Some action with " + str);
-            }), 
+                AddInputField("Input some ", a: (str) => { Debug.Log("Some action with " + str); }),
 
-            AddText("Some text"),
+                AddText("Some text"),
 
-            AddButton("Open page 11", () =>
-            {
-                Page11();
-            })
-            
+                AddButton("Open page 11", () => { Page11(); })
 
-        });
-    }
-    private void Page11()
-    {
 
-        OpenPage(new List<DeveloperItem>()
+            });
+        }
+
+        private void Page11()
         {
-            AddInputField("Input some ", a: (str) =>
+
+            OpenPage(new List<DeveloperItem>()
             {
-                Debug.Log("Some action with " + str);
-            }),
+                AddInputField("Input some ", a: (str) => { Debug.Log("Some action with " + str); }),
 
 
-        });
-    }
-    private void Page2()
-    {
+            });
+        }
 
-        OpenPage(new List<DeveloperItem>()
+        private void Page2()
         {
-            AddInputField("Input some ", a: (str) =>
+
+            OpenPage(new List<DeveloperItem>()
             {
-                Debug.Log("Some action with " + str);
-            }),
+                AddInputField("Input some ", a: (str) => { Debug.Log("Some action with " + str); }),
 
 
-        });
+            });
+        }
     }
 }

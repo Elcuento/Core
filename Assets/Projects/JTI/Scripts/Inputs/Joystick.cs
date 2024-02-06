@@ -35,6 +35,7 @@ namespace JTI.Scripts
         [SerializeField] private float _deathZone = 10;
         [SerializeField] private ClickHandler _clickHandler;
 
+        public bool IsUsing { get; set; }
         public Vector2 Axis { get; set; }
         public int Number => _number;
 
@@ -97,6 +98,8 @@ namespace JTI.Scripts
             if (!_isPressed)
                 return;
 
+            IsUsing = true;
+
             Vector2 pos;
 
             if (_canvas.renderMode == RenderMode.ScreenSpaceOverlay)
@@ -133,6 +136,7 @@ namespace JTI.Scripts
                 _alpha.alpha = 0;
             }
 
+            IsUsing = false;
             Axis = Vector3.zero;
             _isPressed = false;
             _handler.transform.localPosition = Vector3.zero;
