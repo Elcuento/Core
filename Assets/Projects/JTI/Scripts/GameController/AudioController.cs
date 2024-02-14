@@ -209,7 +209,20 @@ namespace JTI.Scripts.GameControllers
                 Source.volume = getVolumeByGroup * Multiply * (Data?.Volume ?? 1);
             }
         }
+        private class AudioFallower : MonoBehaviour
+        {
+            public Transform Obj;
 
+            public void Update()
+            {
+                if (Obj == null)
+                {
+                    Destroy(gameObject);
+                    return;
+                }
+                transform.position = Obj.transform.position;
+            }
+        }
         [SerializeField] private AudioControllerSettings _settings;
 
         private Action _onUpdateEvent;
@@ -492,6 +505,7 @@ namespace JTI.Scripts.GameControllers
             }
         }
 
+        
         public void PlayOneShot3D(string id, Transform tr)
         {
 
@@ -501,16 +515,11 @@ namespace JTI.Scripts.GameControllers
             // Debug.Log(clip +":" + clip?.length);
             if (clip != null)
             {
-                var go = new GameObject("AudioClip" + id)
-                {
-                    transform =
-                    {
-                        position = tr.position
-                    }
-                };
-                go.transform.SetParent(tr);
+                var fallow = new GameObject("AudioClip" + id).AddComponent<AudioFallower>();
+                fallow.Obj = tr;
 
-                var source = go.AddComponent<AudioSource>();
+                var source = fallow.gameObject.AddComponent<AudioSource>();
+
                 source.volume = GetVolumeByGroup(-1) *
                                 (data == null
                                     ? 1f
@@ -522,7 +531,7 @@ namespace JTI.Scripts.GameControllers
                 source.rolloffMode = AudioRolloffMode.Linear;
                 source.maxDistance = data == null || data.Range == -1 ? 1.1f : data.Range;
                 source.Play();
-                Object.Destroy(go, clip.length);
+                Object.Destroy(fallow.gameObject, clip.length);
             }
         }
 
