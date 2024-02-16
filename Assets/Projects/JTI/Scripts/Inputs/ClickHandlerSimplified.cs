@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace JTI.Scripts
 {
-    public class ClickHandlerSimplified : MonoBehaviour//,  IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
+    public class ClickHandlerSimplified : MonoBehaviour
     {
         public Action OnClickEvent;
 
@@ -20,17 +20,17 @@ namespace JTI.Scripts
         {
             if (_raycaster == null)
             {
-                _raycaster = FindObjectOfType<GraphicRaycaster>();
+                _raycaster = gameObject.GetComponentInParent<GraphicRaycaster>()
+                ?? FindObjectOfType<GraphicRaycaster>();
             }
 
-            eventSystem = FindObjectOfType<EventSystem>();
+            eventSystem = EventSystem.current;
         }
 
         public void ForceClick()
         {
             _forceClick = true;
             _click = true;
-            Debug.Log("FORE" + Input.touchCount);
         }
 
         private void Update()
@@ -39,7 +39,6 @@ namespace JTI.Scripts
             {
                 if (Input.touchCount > 0)
                 {
-                    Debug.Log("LTAEA" + Input.touchCount);
                     for (var i = 0; i < Input.touchCount; i++)
                     {
                         var t = Input.GetTouch(i);
@@ -52,14 +51,9 @@ namespace JTI.Scripts
                             }
                             else
                             {
-                                Debug.Log("False");
                                 _click = false;
                                 return;
                             }
-                        }
-                        else if (t.phase == TouchPhase.Ended)
-                        {
-                            Debug.Log("End");
                         }
                     }
 
@@ -72,17 +66,20 @@ namespace JTI.Scripts
                 }
             }
             else
-            {
-                if (Input.GetKey(KeyCode.Mouse0))
+            { 
+                if (Input.GetKeyUp(KeyCode.Mouse0))
                 {
                     Press();
-                }else if (Input.GetKeyUp(KeyCode.Mouse0))
-                {
-                    Press();
+                    _click = false;
                 }
+                else
                 if (Input.GetKeyDown(KeyCode.Mouse0))
                 {
                     _click = true;
+                    Press();
+                }else
+                if (Input.GetKey(KeyCode.Mouse0))
+                {
                     Press();
                 }
 
@@ -113,10 +110,17 @@ namespace JTI.Scripts
 
         private void Press()
         {
-           // Debug.Log("Pres" + _click);
             if (_click)
             {
-                OnClickEvent?.Invoke();
+                try
+                {
+                    OnClickEvent?.Invoke();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+              
             }
         }
   

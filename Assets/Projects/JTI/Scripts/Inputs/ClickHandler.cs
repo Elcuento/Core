@@ -28,10 +28,11 @@ namespace JTI.Scripts
         {
             if (_raycaster == null)
             {
-                _raycaster = FindObjectOfType<GraphicRaycaster>();
+                _raycaster = gameObject.GetComponentInParent<GraphicRaycaster>()
+                             ?? FindObjectOfType<GraphicRaycaster>();
             }
 
-            eventSystem = FindObjectOfType<EventSystem>();
+            eventSystem = EventSystem.current;
         }
 
         private void Update()
@@ -86,22 +87,22 @@ namespace JTI.Scripts
                 {
                     if (CheckClick(Position))
                     {
-
                         PressDown();
                     }
                 }
 
-
                 if (!_click) return;
+
+                if (Input.GetKeyUp(KeyCode.Mouse0))
+                {
+                    PressUp();
+                }
 
                 if (Input.GetKey(KeyCode.Mouse0))
                 {
                     Press();
                 }
-                if (Input.GetKeyUp(KeyCode.Mouse0))
-                {
-                    PressUp();
-                }
+               
             }
 
         }
@@ -131,14 +132,30 @@ namespace JTI.Scripts
         {
             if (_click)
             {
-                OnClickEvent?.Invoke();
+                try
+                {
+                    OnClickEvent?.Invoke();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+             
             }
         }
         private void Press()
         {
             if (_click)
             {
-                OnClickEvent?.Invoke();
+                try
+                {
+                    OnClickEvent?.Invoke();
+                }
+                catch (Exception e)
+                {
+                   Debug.LogError(e);
+                }
+             
             }
         }
 
@@ -147,7 +164,16 @@ namespace JTI.Scripts
             if (_click)
             {
                 _click = false;
-                OnClickUpEvent?.Invoke();
+
+                try
+                {
+                    OnClickUpEvent?.Invoke();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+             
             }
         }
         private void PressUp()
@@ -155,7 +181,16 @@ namespace JTI.Scripts
             if (_click)
             {
                 _click = false;
-                OnClickUpEvent?.Invoke();
+
+                try
+                {
+                    OnClickUpEvent?.Invoke();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+           
             }
         }
 
@@ -163,13 +198,31 @@ namespace JTI.Scripts
         {
             _touch = t;
             _click = true;
-            OnClickDownEvent?.Invoke();
+
+            try
+            {
+                OnClickDownEvent?.Invoke();
+            }
+            catch (Exception e)
+            {
+               Debug.LogError(e);
+            }
+    
         }
 
         private void PressDown()
         {
             _click = true;
-            OnClickDownEvent?.Invoke();
+
+            try
+            {
+                OnClickDownEvent?.Invoke();
+            }
+            catch (Exception e)
+            {
+               Debug.LogError(e);
+            }
+          
         }
     }
 }

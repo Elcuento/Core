@@ -282,24 +282,7 @@ namespace JTI.Scripts.Common
             return false;
 
         }
-        public static Vector3 ScreenToUISpace(Canvas parentCanvas, Vector3 screenPos)
-        {
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(parentCanvas.transform as RectTransform, screenPos, parentCanvas.worldCamera,
-                out var movePos);
-
-            return parentCanvas.transform.TransformPoint(movePos);
-        }
-
-        public static Vector3 WorldToUISpace(Canvas parentCanvas, Vector3 worldPos)
-        {
-            var screenPos = Camera.main.WorldToScreenPoint(worldPos);
-
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(parentCanvas.transform as RectTransform, screenPos, parentCanvas.worldCamera,
-                out var movePos);
-
-            return parentCanvas.transform.TransformPoint(movePos);
-        }
-
+   
         public static bool HasSybmols(string a)
         {
 #if UNITY_EDITOR
