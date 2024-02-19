@@ -66,23 +66,30 @@ namespace JTI.Scripts
                 }
             }
             else
-            { 
-                if (Input.GetKeyUp(KeyCode.Mouse0))
-                {
-                    Press();
-                    _click = false;
-                }
-                else
+            {
+
                 if (Input.GetKeyDown(KeyCode.Mouse0))
                 {
-                    _click = true;
-                    Press();
-                }else
-                if (Input.GetKey(KeyCode.Mouse0))
-                {
-                    Press();
+                    if (CheckClick(Input.mousePosition) || _forceClick)
+                    {
+                        _click = true;
+                        Press();
+                    }
                 }
 
+                if (_click)
+                {
+                    if (Input.GetKeyUp(KeyCode.Mouse0))
+                    {
+                        Press();
+                        _click = false;
+                    }
+                    else
+                    if (Input.GetKey(KeyCode.Mouse0) && _click)
+                    {
+                        Press();
+                    }
+                }
             }
 
         }
@@ -120,9 +127,9 @@ namespace JTI.Scripts
                 {
                     Debug.LogError(e);
                 }
-              
+
             }
         }
-  
+
     }
 }

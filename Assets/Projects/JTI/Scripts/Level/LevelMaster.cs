@@ -48,9 +48,9 @@ namespace JTI.Scripts.Level
 		private EventSubscriberMonoLocal<LevelEvent> _subscriber;
 
         private void Awake()
-		{
+        {
+            EventManager = new EventManagerLocal<LevelEvent>();
             _subscriber = new EventSubscriberMonoLocal<LevelEvent>(this, EventManager);
-            _controllers = new List<LevelController>();
             LevelBehaviourList = new List<LevelBehaviour>();
 
             CreateResult();
@@ -60,7 +60,7 @@ namespace JTI.Scripts.Level
 
         private void Start()
         {
-            StartCoroutine(StartCoroutine());
+            ChangeState(LevelState.Awake);
 
             OnStart();
         }
@@ -87,10 +87,8 @@ namespace JTI.Scripts.Level
             }
         }
 
-        private IEnumerator StartCoroutine()
+        private IEnumerator StartGameCoroutine()
         {
-            yield return null;
-            ChangeState(LevelState.Awake);
             yield return null;
             ChangeState(LevelState.Setup);
             AddCustomControllers();
@@ -121,7 +119,7 @@ namespace JTI.Scripts.Level
                     StartCoroutine(EndCoroutine());
                     break;
                 case LevelState.Awake:
-                    StartCoroutine(StartCoroutine());
+                    StartCoroutine(StartGameCoroutine());
                     break;
             }
 

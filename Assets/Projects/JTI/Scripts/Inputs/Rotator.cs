@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -5,19 +6,22 @@ namespace JTI.Scripts
 {
     public class Rotator : MonoBehaviour
     {
-        public UnityEvent<Vector2> RotateEvent;
-
+        [SerializeField] private float _deathZone = 0;
+        public Action<Vector2> OnRotateEvent { get; private set; }
         public Vector3 Axis { get; private set; }
 
         [SerializeField] private ClickHandler _clickHandler;
 
         private bool _isPressed;
+        private Vector3 _lastClickPlace;
 
         private void Start()
         {
             _clickHandler.OnClickDownEvent += PressDown;
             _clickHandler.OnClickEvent += Press;
             _clickHandler.OnClickUpEvent += UnPress;
+
+            _lastClickPlace = _clickHandler.Position;
         }
 
         private void OnDestroy()
@@ -39,25 +43,22 @@ namespace JTI.Scripts
 
         }
 
-   /*     private float _xRotation;
-        private float _yRotation;*/
-
         private void Press()
         {
             if (!_isPressed)
                 return;
 
+            if (Vector3.Distance(_clickHandler.Position, _lastClickPlace) < _deathZone)
+            {
+                Axis = new Vector3();
+                return;
+            }
 
             Axis = new Vector2(_clickHandler.Delta.x, _clickHandler.Delta.y);
 
-            RotateEvent?.Invoke(new Vector2(_clickHandler.Delta.x, _clickHandler.Delta.y));
+            OnRotateEvent?.Invoke(new Vector2(_clickHandler.Delta.x, _clickHandler.Delta.y));
 
-          /* _xRotation -= mouseY;
-           _xRotation = Mathf.Clamp(_xRotation, -90, 90f);
-
-           _yRotation += mouseX;
-            */
-            //  Target.RotateCamera(Quaternion.Euler(_xRotation, _yRotation, 0f));
+            _lastClickPlace = _clickHandler.Position;
         }
 
         private void UnPress()
@@ -69,7 +70,7 @@ namespace JTI.Scripts
 
             Axis = new Vector3(0, 0);
 
-            RotateEvent?.Invoke(new Vector2(0, 0));
+            OnRotateEvent?.Invoke(new Vector2(0, 0));
         }
     }
 }
