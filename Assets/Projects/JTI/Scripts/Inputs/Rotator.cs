@@ -8,6 +8,7 @@ namespace JTI.Scripts
     {
         [SerializeField] private float _deathZone = 0;
         public Action<Vector2> OnRotateEvent { get; private set; }
+
         public Vector3 Axis { get; private set; }
 
         [SerializeField] private ClickHandler _clickHandler;

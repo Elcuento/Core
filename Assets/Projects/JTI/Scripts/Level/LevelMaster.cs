@@ -10,18 +10,18 @@ using UnityEngine.SceneManagement;
 
 namespace JTI.Scripts.Level
 {
-	public class LevelMaster : MonoBehaviour
-	{
+    public class LevelMaster : MonoBehaviour
+    {
         public enum LevelState
         {
-			UnStarted,
-			Awake,
-			Setup,
-			Initialize,
+            UnStarted,
+            Awake,
+            Setup,
+            Initialize,
             LateInitialize,
             PreStart,
-			Started,
-			IsEnd
+            Started,
+            IsEnd
         }
 
         public class LevelResult
@@ -38,14 +38,16 @@ namespace JTI.Scripts.Level
             public ResultType Type;
         }
 
+        [SerializeField] private Transform _levelField;
         [SerializeField] private List<LevelController> _controllers;
         public LevelState CurrentState { get; private set; }
         public EventManagerLocal<LevelEvent> EventManager { get; private set; }
         public List<LevelBehaviour> LevelBehaviourList { get; private set; }
+        public Transform LevelField => _levelField;
         public bool IsPause { get; private set; }
         public LevelResult Result { get; private set; }
 
-		private EventSubscriberMonoLocal<LevelEvent> _subscriber;
+        private EventSubscriberMonoLocal<LevelEvent> _subscriber;
 
         private void Awake()
         {
@@ -66,8 +68,8 @@ namespace JTI.Scripts.Level
         }
 
         private void OnDestroy()
-		{
-			_subscriber?.Destroy();
+        {
+            _subscriber?.Destroy();
 
             OnOnDestroy();
         }
@@ -233,7 +235,7 @@ namespace JTI.Scripts.Level
         }
         public virtual void OnSetPause()
         {
-    
+
         }
 
         public virtual bool IsCanChangeState(LevelState state)
