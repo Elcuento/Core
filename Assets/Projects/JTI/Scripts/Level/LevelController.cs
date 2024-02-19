@@ -62,5 +62,9 @@ namespace JTI.Scripts.Level
 
         }
 
+        public void SetPause(bool isPause)
+        {
+            
+        }
     }
 }

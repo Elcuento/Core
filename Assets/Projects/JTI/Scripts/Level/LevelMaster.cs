@@ -42,6 +42,7 @@ namespace JTI.Scripts.Level
         public LevelState CurrentState { get; private set; }
         public EventManagerLocal<LevelEvent> EventManager { get; private set; }
         public List<LevelBehaviour> LevelBehaviourList { get; private set; }
+        public bool IsPause { get; private set; }
         public LevelResult Result { get; private set; }
 
 		private EventSubscriberMonoLocal<LevelEvent> _subscriber;
@@ -137,6 +138,8 @@ namespace JTI.Scripts.Level
                 return false;
             }
 
+            controller.SetPause(IsPause);
+
             _controllers.Add(controller);
 
             return true;
@@ -147,13 +150,51 @@ namespace JTI.Scripts.Level
             return (T)_controllers.FirstOrDefault(x => x is T);
         }
 
+        public void SetPause(bool aPause)
+        {
+            IsPause = aPause;
+
+            for (var index = 0; index < _controllers.Count; index++)
+            {
+                var levelController = _controllers[index];
+
+                if (levelController == null)
+                {
+                    _controllers.Remove(_controllers[index]);
+                    index--;
+                    continue;
+                }
+
+                levelController.SetPause(IsPause);
+            }
+
+            for (var index = 0; index < LevelBehaviourList.Count; index++)
+            {
+                var levelBehaviour = LevelBehaviourList[index];
+
+                if (levelBehaviour == null)
+                {
+                    LevelBehaviourList.Remove(LevelBehaviourList[index]);
+                    index--;
+                    continue;
+                }
+
+                levelBehaviour.SetPause(IsPause);
+            }
+
+            OnSetPause();
+        }
+
 
         public void AddLevelBehaviour(LevelBehaviour levelBehaviour)
         {
             if (LevelBehaviourList.Contains(levelBehaviour)) return;
 
             LevelBehaviourList.Add(levelBehaviour);
+
             levelBehaviour.Setup(this);
+
+            levelBehaviour.SetPause(IsPause);
         }
 
         public void RemoveLevelBehaviour(LevelBehaviour levelBehaviour)
@@ -191,6 +232,10 @@ namespace JTI.Scripts.Level
                 }*/
 #endif
 
+        }
+        public virtual void OnSetPause()
+        {
+    
         }
 
         public virtual bool IsCanChangeState(LevelState state)

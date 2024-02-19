@@ -27,6 +27,11 @@ public class LevelBehaviour : MonoBehaviour
         OnOnDestroy();
     }
 
+    public virtual void ChangeState(LevelMaster.LevelState state)
+    {
+
+    }
+
     protected virtual void OnOnDestroy()
     {
 
@@ -38,5 +43,10 @@ public class LevelBehaviour : MonoBehaviour
     public void Setup(LevelMaster m)
     {
         Master = m;
+    }
+
+    public virtual void SetPause(bool isPause)
+    {
+     
     }
 }
