@@ -20,6 +20,11 @@ public class LevelBehaviour : MonoBehaviour
         OnAwake();
     }
 
+    public T GetMaster<T>() where T : LevelMaster
+    {
+        return Master as T;
+    }
+
     private void OnDestroy()
     {
         Master.RemoveLevelBehaviour(this);
