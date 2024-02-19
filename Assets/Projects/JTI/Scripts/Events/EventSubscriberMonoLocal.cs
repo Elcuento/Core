@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JTI.Scripts.Events.Level;
 using UnityEngine;
 
 namespace JTI.Scripts.Events
@@ -65,6 +66,14 @@ namespace JTI.Scripts.Events
             }
         }
 
+        public void Publish<T>(T eventMessage) where T : TO
+        {
+            if (!Check())
+                return;
+
+            _eventManager.Publish(eventMessage);
+        }
+
         public bool Check()
         {
             if (_eventManager == null)
@@ -97,5 +106,7 @@ namespace JTI.Scripts.Events
         {
             _events.Clear();
         }
+
+   
     }
 }

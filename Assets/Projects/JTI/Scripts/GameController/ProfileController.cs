@@ -1,6 +1,7 @@
 using System;
 using Assets.JTI.Scripts.Events.Game;
 using JTI.Scripts.Events;
+using JTI.Scripts.Events.Game;
 using JTI.Scripts.GameControllers;
 using JTI.Scripts.Storage;
 

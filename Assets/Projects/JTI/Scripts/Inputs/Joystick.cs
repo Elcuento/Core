@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using JTI.Examples;
 using JTI.Scripts.Common;
 using UnityEngine;
 using UnityEngine.Events;
@@ -80,7 +81,7 @@ namespace JTI.Scripts
                 }
                 else
                 {
-                    transform.position = Utils.ScreenToUISpace(_canvas,
+                    transform.position = PositionAndRotationHelper.ScreenToUISpace(_canvas,
                         _clickHandler.Position);
                 }
             }
@@ -108,7 +109,7 @@ namespace JTI.Scripts
             }
             else
             {
-                pos = Utils.ScreenToUISpace(_canvas,
+                pos = PositionAndRotationHelper.ScreenToUISpace(_canvas,
                     _clickHandler.Position);
             }
 

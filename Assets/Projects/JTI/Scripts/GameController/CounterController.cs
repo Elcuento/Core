@@ -5,6 +5,7 @@ using System.Net;
 using Assets.JTI.Scripts.Events.Game;
 using DG.Tweening;
 using JTI.Scripts.Events;
+using JTI.Scripts.Events.Game;
 using JTI.Scripts.GameControllers;
 using JTI.Scripts.Localization.Data;
 using JTI.Scripts.Storage;
