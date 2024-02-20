@@ -68,28 +68,36 @@ namespace JTI.Scripts
             else
             {
 
+                var sended = false;
+
                 if (Input.GetKeyDown(KeyCode.Mouse0))
                 {
                     if (CheckClick(Input.mousePosition) || _forceClick)
                     {
+                        sended = true;
                         _click = true;
                         Press();
                     }
                 }
 
-                if (_click)
+                if (!sended)
                 {
-                    if (Input.GetKeyUp(KeyCode.Mouse0))
+                    if (_click)
                     {
-                        Press();
-                        _click = false;
-                    }
-                    else
-                    if (Input.GetKey(KeyCode.Mouse0) && _click)
-                    {
-                        Press();
+                        if (Input.GetKeyUp(KeyCode.Mouse0))
+                        {
+                            Press();
+                            _click = false;
+                            _forceClick = false;
+                        }
+                        else
+                        if (Input.GetKey(KeyCode.Mouse0) && _click)
+                        {
+                            Press();
+                        }
                     }
                 }
+
             }
 
         }

@@ -42,7 +42,7 @@ namespace JTI.Scripts.Level
         [SerializeField] private List<LevelController> _controllers;
         public LevelState CurrentState { get; private set; }
         public EventManagerLocal<LevelEvent> EventManager { get; private set; }
-        public List<LevelBehaviour> LevelBehaviourList { get; private set; }
+        public List<LevelBehaviour> LevelBehaviourList { get; private set; } = new List<LevelBehaviour>();
         public Transform LevelField => _levelField;
         public bool IsPause { get; private set; }
         public LevelResult Result { get; private set; }
@@ -53,7 +53,6 @@ namespace JTI.Scripts.Level
         {
             EventManager = new EventManagerLocal<LevelEvent>();
             _subscriber = new EventSubscriberMonoLocal<LevelEvent>(this, EventManager);
-            LevelBehaviourList = new List<LevelBehaviour>();
 
             CreateResult();
 
