@@ -1,9 +1,13 @@
 using JTI.Scripts;
 using UnityEngine;
 
-public class JoystickSystem : MonoBehaviour
+namespace JTI.Scripts
 {
-    [SerializeField] private Joystick _joystick;
+    public class JoystickSystem : MonoBehaviour
+    {
+        [SerializeField] private Joystick _joystick;
 
-    public Joystick Joystick => _joystick;
+        public Joystick Joystick => _joystick;
+    }
+
 }

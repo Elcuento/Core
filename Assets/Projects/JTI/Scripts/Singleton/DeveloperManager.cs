@@ -220,12 +220,15 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     private float _swapTime;
     private bool _show;
 
+    private List<string> _logs;
+
     protected override void OnAwaken()
     {
         base.OnAwaken();
 
         _items = new List<DeveloperItem>();
         _containers = new Dictionary<ContainerPosition, Transform>();
+        _logs = new List<string>();
 
         CreateFont();
         Check();
@@ -235,9 +238,34 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         {
             Debug.LogError("No EventSystem in scene! Add it first");
         }
+
+        Application.logMessageReceived += (condition, trace, type) =>
+        {
+            var color = type == LogType.Error ? "#" : type == LogType.Warning ? "#" : $"";
+            var str = $"<color={color}>{condition}\n{trace}</color>";
+            _logs.Add(str);
+        };
     }
 
 
+    private DeveloperText AddDebugConsoleItem(ContainerPosition pos)
+    {
+        
+        var b = new DeveloperText(new Settings(), _containers[pos].transform, "", onUpdate: (t) =>
+        {
+
+           
+        });
+
+        Application.logMessageReceived += (condition, trace, type) =>
+        {
+            var color = type == LogType.Error ? "#" : type == LogType.Warning ? "#" : $"";
+            var str = $"<color={color}>{condition}\n{trace}</color>";
+            b.Text.text += "\n" + str;
+        };
+
+        return b;
+    }
     private void Check()
     {
         if (_canvas == null)

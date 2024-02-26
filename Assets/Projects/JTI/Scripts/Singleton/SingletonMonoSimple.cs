@@ -22,7 +22,7 @@ namespace JTI.Scripts.Managers
 
         protected void Awake()
         {
-            if (_instance == null)
+            if (_instance == null || _instance == this)
             {
                 _instance = this as T;
                 OnAwaken();

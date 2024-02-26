@@ -6,6 +6,8 @@ public class LineSmoother : MonoBehaviour
 {
     public static List<Vector3> SmoothList(List<Vector3> points, int resolution)
     {
+        resolution = Mathf.Clamp(resolution, 0, int.MaxValue);
+
         List<Vector3> smoothedPoints = new List<Vector3>();
 
         // Add extra points at the beginning and end of the list
