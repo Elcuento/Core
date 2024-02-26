@@ -222,7 +222,7 @@ namespace JTI.Projects.Rope3D
                 else Destroy(from.Joint);
             }
 
-            from.Joint = to.gameObject.AddComponent<HingeJoint>();
+            from.Joint = to.gameObject.AddComponent<ConfigurableJoint>();
             from.Joint.autoConfigureConnectedAnchor = true;
             from.Joint.anchor = to.transform.InverseTransformPoint(from.transform.position);
             from.Joint.connectedBody = from.Rigid;
@@ -230,6 +230,10 @@ namespace JTI.Projects.Rope3D
             from.Joint.axis = new Vector3(0, 0, -1);
             from.Joint.anchor = new Vector3(0, 0, -_segmentSpacing * 2);
             from.Joint.enablePreprocessing = true;
+            from.Joint.projectionMode = JointProjectionMode.PositionAndRotation;
+            from.Joint.xMotion = ConfigurableJointMotion.Locked;
+            from.Joint.yMotion = ConfigurableJointMotion.Locked;
+            from.Joint.zMotion = ConfigurableJointMotion.Locked;
         }
 
         public void CreateJoint(RopeSegment3D from, RopeSegment3D to)
@@ -243,7 +247,7 @@ namespace JTI.Projects.Rope3D
             }
 
             //  from.Joint = null;
-            from.Joint = from.gameObject.AddComponent<HingeJoint>();
+            from.Joint = from.gameObject.AddComponent<ConfigurableJoint>();
 
             from.Joint.autoConfigureConnectedAnchor = false;
             from.Joint.connectedAnchor = new Vector2(0, 0);
@@ -252,6 +256,10 @@ namespace JTI.Projects.Rope3D
             from.Joint.connectedBody = to.Rigid;
             from.Joint.breakForce = _breakForce <= 0 ? float.PositiveInfinity : _breakForce;
             from.Joint.enablePreprocessing = true;
+            from.Joint.projectionMode = JointProjectionMode.PositionAndRotation;
+            from.Joint.xMotion = ConfigurableJointMotion.Locked;
+            from.Joint.yMotion = ConfigurableJointMotion.Locked;
+            from.Joint.zMotion = ConfigurableJointMotion.Locked;
         }
 
         public float GetLength()

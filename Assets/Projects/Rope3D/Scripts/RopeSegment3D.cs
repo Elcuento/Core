@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Assets.Rope;
 using UnityEngine;
 
 namespace JTI.Projects.Rope3D
@@ -16,7 +15,7 @@ namespace JTI.Projects.Rope3D
         public GameObject Prev;
 
         public Rigidbody Rigid;
-        public HingeJoint Joint;
+        public ConfigurableJoint Joint;
 
         public Rope3D Rope;
 
@@ -39,7 +38,7 @@ namespace JTI.Projects.Rope3D
                     continue;
                 }
 
-                var j = d.GetComponents<HingeJoint>();
+                var j = d.GetComponents<ConfigurableJoint>();
 
                 for (var i = 0; i < j.Length; i++)
                 {
