@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 #if UNITY_EDITOR
 #endif
 
-namespace Assets.Rope
+namespace JTI.Projects.Rope2D
 {
     public class Rope : MonoBehaviour
     {
@@ -53,7 +53,7 @@ namespace Assets.Rope
                         Utils.RotateReverseZ(part.transform, prev.transform.position);
                 }
 
-                part.Init(this, prev?.gameObject, next?.gameObject);
+                part.Init(this, prev?.gameObject, next?.gameObject, _segmentSpacing);
             }
 
             Draw();

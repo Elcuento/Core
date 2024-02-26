@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Assets.Rope.Editor
+namespace JTI.Projects.Rope2D
 {
     [CustomEditor(typeof(Rope))]
     public class RopeEditor : UnityEditor.Editor

@@ -13,13 +13,13 @@ namespace JTI.Projects.Rope3D
     {
         [SerializeField] string _pathToRope;
         [SerializeField] Rope3DMeshRender _render;
-        [SerializeField] RopeSegment3D _segmentPrefab;
+        [SerializeField] Rope3DSegment _segmentPrefab;
         [SerializeField] Transform _container;
-        [SerializeField] List<RopeSegment3D> _segments;
+        [SerializeField] List<Rope3DSegment> _segments;
         [SerializeField] private float _smooth;
         [SerializeField] private float _breakForce;
 
-        public List<RopeSegment3D> Segments => _segments;
+        public List<Rope3DSegment> Segments => _segments;
 
         [SerializeField] private float _segmentSpacing;
         public float SegmentSpacing => _segmentSpacing;
@@ -99,7 +99,7 @@ namespace JTI.Projects.Rope3D
         }
 
 
-        public void Cut(RopeSegment3D s)
+        public void Cut(Rope3DSegment s)
         {
             if (_breakForce == -1)
                 return;
@@ -117,7 +117,7 @@ namespace JTI.Projects.Rope3D
 
             if ((from <= 1 && cutCount <= 1) || _segments.Count <= 3) return;
 
-            var list = new List<RopeSegment3D>();
+            var list = new List<Rope3DSegment>();
             for (var i = 0; i < cutCount + 1; i++)
             {
                 if (list.Count == 0)
@@ -144,14 +144,14 @@ namespace JTI.Projects.Rope3D
         }
 
 
-        public void Copy(List<RopeSegment3D> segments)
+        public void Copy(List<Rope3DSegment> segments)
         {
             var o = Instantiate(Resources.Load<Rope3D>(_pathToRope));
             o.name = Random.Range(0, 9999).ToString();
             o.Init(segments, _breakForce);
         }
 
-        public void Init(List<RopeSegment3D> rope, float b)
+        public void Init(List<Rope3DSegment> rope, float b)
         {
             _segments = rope;
             _breakForce = b;
@@ -166,9 +166,9 @@ namespace JTI.Projects.Rope3D
 
         public void SpawnNoInit(Vector3 place)
         {
-            if (Segments == null) _segments = new List<RopeSegment3D>();
+            if (Segments == null) _segments = new List<Rope3DSegment>();
 
-            RopeSegment3D tmp = null;
+            Rope3DSegment tmp = null;
 
             tmp = Utils.SpawnPrefabOfInstance(_segmentPrefab);
             tmp.transform.position = place;
@@ -183,9 +183,9 @@ namespace JTI.Projects.Rope3D
 
         public void Spawn(Vector3 place)
         {
-            if (Segments == null) _segments = new List<RopeSegment3D>();
+            if (Segments == null) _segments = new List<Rope3DSegment>();
 
-            RopeSegment3D tmp = null;
+            Rope3DSegment tmp = null;
 
             tmp = Utils.SpawnPrefabOfInstance(_segmentPrefab);
             tmp.transform.position = place;
@@ -200,7 +200,7 @@ namespace JTI.Projects.Rope3D
             InitRope();
         }
 
-        public void DestroyJoint(RopeSegment3D from)
+        public void DestroyJoint(Rope3DSegment from)
         {
             if (from.Joint != null)
             {
@@ -213,7 +213,7 @@ namespace JTI.Projects.Rope3D
 
         }
 
-        public void CreateJoint(RopeSegment3D from, Rigidbody to, bool autoConfig = true)
+        public void CreateJoint(Rope3DSegment from, Rigidbody to, bool autoConfig = true)
         {
             if (from.Joint != null)
             {
@@ -236,7 +236,7 @@ namespace JTI.Projects.Rope3D
             from.Joint.zMotion = ConfigurableJointMotion.Locked;
         }
 
-        public void CreateJoint(RopeSegment3D from, RopeSegment3D to)
+        public void CreateJoint(Rope3DSegment from, Rope3DSegment to)
         {
             //  Debug.Log("Create jount " + name +":" + from +":" + to);
             if (from.Joint != null)
@@ -295,7 +295,7 @@ namespace JTI.Projects.Rope3D
             Draw();
         }
 
-        public void DestroySegment(RopeSegment3D s)
+        public void DestroySegment(Rope3DSegment s)
         {
             if (Application.isPlaying)
                 Destroy(s.gameObject);

@@ -1,72 +1,77 @@
 ﻿using System.Collections.Generic;
-using Assets.Rope;
 using UnityEngine;
 
-public class RopeSegment : MonoBehaviour
+namespace JTI.Projects.Rope2D
 {
-    [SerializeField] private bool _fix;
-    [SerializeField] private List<Rigidbody2D> _attach;
-
-    public GameObject Next;
-    public GameObject Prev;
-
-    public Rigidbody2D Rigid;
-    public HingeJoint2D Joint;
-
-    public Rope Rope;
-
-    private void Awake()
+    public class RopeSegment : MonoBehaviour
     {
-       // Joint = GetComponent<HingeJoint2D>();
+        [SerializeField] private CircleCollider2D _collider;
+        [SerializeField] private CircleCollider2D _colliderTrigger;
 
-        Rigid.centerOfMass = Vector3.zero;
+        [SerializeField] private bool _fix;
+        [SerializeField] private List<Rigidbody2D> _attach;
 
-        if (_fix)
+        public GameObject Next;
+        public GameObject Prev;
+
+        public Rigidbody2D Rigid;
+        public HingeJoint2D Joint;
+
+        public Rope Rope;
+
+        private void Awake()
         {
-            Rigid.constraints = RigidbodyConstraints2D.FreezeAll;
-        }
+            Rigid.centerOfMass = Vector3.zero;
 
-        for (var index = 0; index < _attach.Count; index++)
-        {
-            var d = _attach[index];
-            if (d == null)
+            if (_fix)
             {
-                _attach.Remove(_attach[index]);
-                index--;
-                continue;
+                Rigid.constraints = RigidbodyConstraints2D.FreezeAll;
             }
 
-            var j = d.GetComponents<HingeJoint2D>();
-
-            for (var i = 0; i < j.Length; i++)
+            for (var index = 0; index < _attach.Count; index++)
             {
-                if (j[i].connectedBody.gameObject == gameObject)
-                    return;
+                var d = _attach[index];
+                if (d == null)
+                {
+                    _attach.Remove(_attach[index]);
+                    index--;
+                    continue;
+                }
+
+                var j = d.GetComponents<HingeJoint2D>();
+
+                for (var i = 0; i < j.Length; i++)
+                {
+                    if (j[i].connectedBody.gameObject == gameObject)
+                        return;
+                }
+
+                Rope.CreateJoint(this, d, true);
             }
-
-            Rope.CreateJoint(this, d, true);
         }
-    }
 
 
-    public void Reap()
-    {
-        Rope.Cut(this);
-    }
+        public void Reap()
+        {
+            Rope.Cut(this);
+        }
 
-    public void Init(Rope rope, GameObject prev, GameObject next)
-    {
-        Next = next;
-        Prev = prev;
+        public void Init(Rope rope, GameObject prev, GameObject next, float spacing)
+        {
+            Next = next;
+            Prev = prev;
 
-        Rope = rope;
+            Rope = rope;
 
-        Rigid.constraints = RigidbodyConstraints2D.None;
-        //      Joint = GetComponent<HingeJoint2D>();
-    }
+            Rigid.constraints = RigidbodyConstraints2D.None;
 
-    public void Push(Vector3 pushPower)
-    {
-        Rigid.AddForce(pushPower);
+            _collider.radius = spacing;
+            _colliderTrigger.radius = spacing;
+        }
+
+        public void Push(Vector3 pushPower)
+        {
+            Rigid.AddForce(pushPower);
+        }
     }
 }

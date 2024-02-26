@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace JTI.Projects.Rope3D
 {
-    public class RopeSegment3D : MonoBehaviour
+    public class Rope3DSegment : MonoBehaviour
     {
         [SerializeField] private SphereCollider _collider;
         [SerializeField] private SphereCollider _colliderTrigger;

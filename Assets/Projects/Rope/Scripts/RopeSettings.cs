@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Assets.Game.Rope.Scripts
+namespace JTI.Projects.Rope2D
 {
     public class RopeSettings : MonoBehaviour
     {
