@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using JTI.Scripts.Managers;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Button = UnityEngine.UI.Button;
+using Cursor = UnityEngine.Cursor;
+using Image = UnityEngine.UI.Image;
+
 public class DeveloperManager : SingletonMono<DeveloperManager>
 {
     public class DeveloperItem
@@ -23,7 +26,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
         public virtual void OnUpdate()
         {
-           
+
         }
 
         public virtual void Create()
@@ -89,6 +92,107 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         public override void OnUpdate()
         {
             _updateAction?.Invoke(this);
+        }
+    }
+    public class DeveloperInputWithText : DeveloperItem
+    {
+        public InputField InputField;
+        public Text Text;
+        private Action<DeveloperInputWithText> _onUpdate;
+        public DeveloperInputWithText(Settings s, Transform c, string txt, string inputText, Action<string> a, Action<DeveloperInputWithText> onUpdate) : base(s, c)
+        {
+            Setup(() =>
+            {
+                var mainFrame = _main.AddComponent<Image>();
+                mainFrame.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
+                var g = mainFrame.gameObject.AddComponent<HorizontalLayoutGroup>();
+                g.childControlWidth = false;
+                mainFrame.gameObject.AddComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+                void CreateText()
+                {
+                    var textContainer = new GameObject("textContainer");
+                    textContainer.transform.SetParent(_main.transform);
+
+                    var im = textContainer.AddComponent<Image>();
+                    textContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
+
+                    var t = new GameObject("Text");
+
+                    Text = t.AddComponent<Text>();
+
+                    Text.text = txt;
+                    Text.resizeTextForBestFit = true;
+                    Text.transform.SetParent(im.transform);
+                    Text.color = Color.black;
+                    Text.font = Font;
+                    Text.alignment = TextAnchor.MiddleCenter;
+                    im.raycastTarget = false;
+                    Text.raycastTarget = false;
+                    var rec = Text.GetComponent<RectTransform>();
+                    rec.anchorMax = new Vector2(1, 1);
+                    rec.anchorMin = new Vector2(0, 0);
+
+                    rec.offsetMax = new Vector2(0, 0);
+                    rec.offsetMin = new Vector2(0, 0);
+
+                    if (_settings.Hide)
+                    {
+                        _main.AddComponent<CanvasGroup>().alpha = 0;
+                    }
+                }
+                void CreateInput()
+                {
+                    _onUpdate = onUpdate;
+
+                    var inputTextContainer = new GameObject("inputTextContainer");
+                    inputTextContainer.transform.SetParent(_main.transform);
+
+                    var im = inputTextContainer.AddComponent<Image>();
+                    InputField = inputTextContainer.AddComponent<InputField>();
+
+                    InputField.onValueChanged.AddListener((astr) =>
+                    {
+                        a?.Invoke(InputField.text);
+                    });
+
+                    im.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
+
+                    var t = new GameObject("Text").AddComponent<Text>();
+
+                    t.resizeTextForBestFit = true;
+                    t.transform.SetParent(im.transform);
+                    t.color = Color.black;
+                    t.font = Font;
+                    t.alignment = TextAnchor.MiddleCenter; ;
+                    t.raycastTarget = false;
+                    var rec = t.GetComponent<RectTransform>();
+                    rec.anchorMax = new Vector2(1, 1);
+                    rec.anchorMin = new Vector2(0, 0);
+
+                    rec.offsetMax = new Vector2(0, 0);
+                    rec.offsetMin = new Vector2(0, 0);
+
+                    InputField.textComponent = t;
+                    InputField.text = inputText;
+
+                    if (_settings.Hide)
+                    {
+                        _main.AddComponent<CanvasGroup>().alpha = 0;
+                    }
+                }
+
+                CreateText();
+                CreateInput();
+
+
+
+            });
+        }
+
+        public override void OnUpdate()
+        {
+            _onUpdate?.Invoke(this);
         }
     }
 
@@ -206,6 +310,8 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     protected static Font Font { get; private set; }
 
+    protected Settings _settings;
+
     protected virtual void CreateFont()
     {
         Font = Font.CreateDynamicFontFromOSFont("Arial", 1);
@@ -213,59 +319,33 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     private Canvas _canvas;
 
-    private Dictionary<ContainerPosition, Transform> _containers;
+    private Dictionary<ContainerPosition, ScrollRect> _containers;
     private List<DeveloperItem> _items;
 
     private Vector2 _prevMousePos;
     private float _swapTime;
     private bool _show;
 
-    private List<string> _logs;
-
     protected override void OnAwaken()
     {
         base.OnAwaken();
 
         _items = new List<DeveloperItem>();
-        _containers = new Dictionary<ContainerPosition, Transform>();
-        _logs = new List<string>();
+        _containers = new Dictionary<ContainerPosition, ScrollRect>();
 
         CreateFont();
         Check();
-        Show(false);
+        ShowHide(false);
 
         if (EventSystem.current == null)
         {
             Debug.LogError("No EventSystem in scene! Add it first");
         }
 
-        Application.logMessageReceived += (condition, trace, type) =>
-        {
-            var color = type == LogType.Error ? "#" : type == LogType.Warning ? "#" : $"";
-            var str = $"<color={color}>{condition}\n{trace}</color>";
-            _logs.Add(str);
-        };
+        _settings = new Settings();
     }
 
 
-    private DeveloperText AddDebugConsoleItem(ContainerPosition pos)
-    {
-        
-        var b = new DeveloperText(new Settings(), _containers[pos].transform, "", onUpdate: (t) =>
-        {
-
-           
-        });
-
-        Application.logMessageReceived += (condition, trace, type) =>
-        {
-            var color = type == LogType.Error ? "#" : type == LogType.Warning ? "#" : $"";
-            var str = $"<color={color}>{condition}\n{trace}</color>";
-            b.Text.text += "\n" + str;
-        };
-
-        return b;
-    }
     private void Check()
     {
         if (_canvas == null)
@@ -284,12 +364,36 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     }
 
-    private Transform CreateContainer(Enum type, Vector3 pivot, Vector2 anchorMax, Vector3 anchorMin)
+    private ScrollRect CreateContainer(Enum type, Vector3 pivot, Vector2 anchorMax, Vector3 anchorMin)
     {
         var c = new GameObject(type.ToString());
-        var v = c.AddComponent<VerticalLayoutGroup>();
-        c.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         c.transform.SetParent(_canvas.transform);
+        var view = c.gameObject.AddComponent<ScrollRect>();
+        var viewRect = view.gameObject.GetComponent<RectTransform>();
+        viewRect.sizeDelta = new Vector2(Screen.width / 3f, Screen.height);
+        view.horizontal = false;
+
+        var viewPort = new GameObject("ViewPort");
+        var viewPortRect = viewPort.AddComponent<RectTransform>();
+        viewPort.transform.SetParent(view.transform);
+        viewPortRect.anchorMax = new Vector2(1, 1);
+        viewPortRect.anchorMin = new Vector2(0, 0);
+        viewPortRect.offsetMax = new Vector2(0, 0);
+        viewPortRect.offsetMin = new Vector2(0, 0);
+        viewPortRect.anchoredPosition = Vector3.zero;
+        view.viewport = viewPortRect;
+
+        var container = new GameObject("Container");
+        container.transform.SetParent(viewPort.transform);
+        view.content = container.AddComponent<RectTransform>();
+        view.content.anchorMax = new Vector2(1, 1);
+        view.content.anchorMin = new Vector2(0, 0);
+        view.content.offsetMax = new Vector2(0, 0);
+        view.content.offsetMin = new Vector2(0, 0);
+        view.content.pivot = new Vector2(0, 1);
+
+        var v = container.AddComponent<VerticalLayoutGroup>();
+        v.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         v.childControlHeight = false;
         v.childControlWidth = false;
@@ -300,17 +404,17 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         rect.anchorMin = anchorMin;
         rect.anchoredPosition = Vector3.zero;
 
-        return c.transform;
+        return view;
     }
 
- /*   protected DeveloperItem CreateFps()
-    {
-        var b = AddText("Fps : ", ContainerPosition.Middle);
+    /*   protected DeveloperItem CreateFps()
+       {
+           var b = AddText("Fps : ", ContainerPosition.Middle);
 
-        b.SetUpdate(() => { b.Text.text = "Fps : " + PerformanceManager.Instance.AverageFps; });
+           b.SetUpdate(() => { b.Text.text = "Fps : " + PerformanceManager.Instance.AverageFps; });
 
-        return b;
-    }*/
+           return b;
+       }*/
 
     protected void ShowMinimize()
     {
@@ -323,7 +427,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     {
         var c = AddText("Scene : ");
 
-       OpenPage(new List<DeveloperItem>()
+        OpenPage(new List<DeveloperItem>()
        {
            AddText("Welcome")
        });
@@ -359,9 +463,9 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             developerItem.Create();
         }
 
-        if (_containers[pos].transform.childCount > 0)
+        if (_containers[pos].content.transform.childCount > 0)
         {
-            _containers[pos].transform.GetChild(_containers[pos].transform.childCount - 1).SetAsFirstSibling();
+            _containers[pos].content.transform.GetChild(_containers[pos].transform.childCount - 1).SetAsFirstSibling();
         }
 
         _items = list;
@@ -369,23 +473,34 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     protected DeveloperInput AddInputField(string text, ContainerPosition pos = ContainerPosition.Left, Action<string> a = null, Action<DeveloperInput> onUpdate = null)
     {
-        var b = new DeveloperInput(new Settings(), _containers[pos].transform, text, a, onUpdate);
+        var b = new DeveloperInput(_settings, _containers[pos].content, text, a, onUpdate);
+
+        return b;
+    }
+    protected DeveloperInputWithText AddTextWithInputField(object text, object inputText = null, ContainerPosition pos = ContainerPosition.Left, Action<string> a = null, Action<DeveloperInputWithText> onUpdate = null)
+    {
+        var b = new DeveloperInputWithText(_settings, _containers[pos].content, text.ToString(), inputText?.ToString() ?? "", a, onUpdate);
 
         return b;
     }
     protected DeveloperButton AddButton(string text, Action a = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperButton> onUpdate = null)
     {
-        var b = new DeveloperButton(new Settings(), _containers[pos].transform, text, a, onUpdate: onUpdate);
+        var b = new DeveloperButton(_settings, _containers[pos].content, text, a, onUpdate: onUpdate);
 
         return b;
     }
     protected DeveloperText AddText(string text, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperText> onUpdate = null)
     {
-        var b = new DeveloperText(new Settings(), _containers[pos].transform, text, onUpdate: onUpdate);
+        var b = new DeveloperText(_settings, _containers[pos].content, text, onUpdate: onUpdate);
 
         return b;
     }
 
+
+    public void SetSettings(Settings settings)
+    {
+        _settings = settings;
+    }
 
     private void Update()
     {
@@ -398,54 +513,53 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
             }
 
-            if (Input.GetKeyUp(KeyCode.Mouse0))
+            if (Input.touchCount == 5)
             {
-                var dir = (Vector2)Input.mousePosition - _prevMousePos;
-                if (dir.magnitude > Screen.height / 2f && _swapTime > Time.time)
-                {
-                    if (Vector2.Angle(dir.normalized, Vector2.down) < 15)
-                    {
-                        if (!_show)
-                        {
-                            ShowHide();
-                            Main();
-                        }
-                    }
-                }
-
+                ShowHide(true);
+                Main();
             }
+            /*   if (Input.GetKeyUp(KeyCode.Mouse0))
+               {
+                   var dir = (Vector2)Input.mousePosition - _prevMousePos;
+                   if (dir.magnitude < Screen.height / 2f && _swapTime > Time.time)
+                   {
+                       if (Vector2.Angle(dir.normalized, Vector2.down) < 15)
+                       {
+                           if (!_show)
+                           {
+                               ShowHide();
+                               Main();
+                           }
+                       }
+                   }
+
+               }*/
         }
-
-
-        if (!_show)
+        else
         {
             if (Input.GetKeyUp(KeyCode.Tilde) || Input.GetKeyUp(KeyCode.Tab))
             {
-                ShowHide();
+                if (!_show)
+                {
+                    if (_prevCursorState != CursorLockMode.Locked)
+                    {
+                        _prevCursorState = Cursor.lockState;
+                    }
+                }
+
+                ShowHideSwitch();
                 Main();
             }
 
-            return;
-        }
-        else
-        {
-            if (_prevCursorState != CursorLockMode.Locked)
-            {
-                _prevCursorState = Cursor.lockState;
-            }
 
         }
 
-        if (Input.GetKeyUp(KeyCode.Tilde) || Input.GetKeyUp(KeyCode.Tab))
+
+        if (!_show) return;
+
+        foreach (var developerItem in _items)
         {
-            ShowHide();
-        }
-        else
-        {
-            foreach (var developerItem in _items)
-            {
-                developerItem.OnUpdate();
-            }
+            developerItem.OnUpdate();
         }
 
 
@@ -453,14 +567,16 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     private CursorLockMode _prevCursorState;
 
-    public void Show(bool a)
+    public void ShowHideSwitch()
     {
-        _show = !a;
-        ShowHide();
+        var s = !_show;
+
+        ShowHide(s);
     }
-    public void ShowHide()
+
+    public void ShowHide(bool s)
     {
-        _show = !_show;
+        _show = s;
 
         if (_show)
         {
