@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using JTI.Examples;
 using JTI.Scripts.Common;
 using UnityEngine;
@@ -10,22 +11,29 @@ namespace JTI.Scripts
     public class Joystick : MonoBehaviour
     {
         public UnityEvent<Vector2> MoveEvent;
-
-        public static Joystick[] Instance
+        public static List<Joystick> Instance
         {
             get
             {
-                if (_instance == null || _instance.Length == 0)
+                for (var index = 0; index < _instance.Count; index++)
                 {
-                    _instance = FindObjectsOfType<Joystick>().ToArray();
+                    if (_instance[index] == null)
+                    {
+                        _instance.Remove(_instance[index]);
+                        index--;
+                    }
+                }
+
+                if (_instance == null || _instance.Count == 0)
+                {
+                    _instance = FindObjectsOfType<Joystick>().ToList();
                 }
 
                 return _instance;
             }
         }
 
-        private static Joystick[] _instance;
-
+        private static List<Joystick> _instance;
 
         [SerializeField] private bool _moveClickPosition = true;
         [SerializeField] private bool _hideWhenNotUse = true;

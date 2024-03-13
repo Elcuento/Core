@@ -32,6 +32,11 @@ namespace JTI.Scripts.Level
             _subscriber.Subscribe<LevelChangeStateEvent>(LevelChangeState);
         }
 
+        public T GetMaster<T>() where T : LevelMaster
+        {
+            return Master as T;
+        }
+
         protected void OnDestroy()
         {
             _subscriber?.Destroy();

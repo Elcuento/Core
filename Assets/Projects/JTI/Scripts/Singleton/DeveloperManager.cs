@@ -332,6 +332,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
         _items = new List<DeveloperItem>();
         _containers = new Dictionary<ContainerPosition, ScrollRect>();
+        _settings = new Settings();
 
         CreateFont();
         Check();
@@ -342,7 +343,6 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             Debug.LogError("No EventSystem in scene! Add it first");
         }
 
-        _settings = new Settings();
     }
 
 
@@ -457,6 +457,13 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         {
             list.Add(AddButton("Back", Main));
         }
+
+        if (list.Count > 0)
+        {
+            list.Add(AddButton("Exit", ShowHideSwitch));
+            list.Add(AddText(Application.version));
+        }
+
 
         foreach (var developerItem in list)
         {
