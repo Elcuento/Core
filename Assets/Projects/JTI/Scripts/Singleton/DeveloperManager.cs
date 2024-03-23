@@ -1,26 +1,34 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using JTI.Scripts.Common;
 using JTI.Scripts.Managers;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Button = UnityEngine.UI.Button;
+using ColorUtility = UnityEngine.ColorUtility;
 using Cursor = UnityEngine.Cursor;
+using Debug = UnityEngine.Debug;
 using Image = UnityEngine.UI.Image;
+using Text = UnityEngine.UI.Text;
 
 public class DeveloperManager : SingletonMono<DeveloperManager>
 {
     public class DeveloperItem
     {
-        protected GameObject _main;
+        protected RectTransform _main;
         private Action _createAction;
 
-        public Settings _settings;
+        public Settings _settingsGlobal;
+        public SettingsElement _settingsElement;
 
-        public DeveloperItem(Settings s, Transform c)
+        public DeveloperItem(Settings sGlobal, SettingsElement sElement, Transform c)
         {
-            _settings = s;
-            _main = new GameObject(GetType().Name);
+            _settingsGlobal = sGlobal;
+            _settingsElement = sElement;
+
+            _main = new GameObject(GetType().Name).AddComponent<RectTransform>();
             _main.transform.SetParent(c);
         }
 
@@ -42,7 +50,14 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
         public void Destroy()
         {
-            UnityEngine.Object.Destroy(_main);
+            UnityEngine.Object.Destroy(_main.gameObject);
+
+            OnDestroy();
+        }
+
+        protected virtual void OnDestroy()
+        {
+
         }
     }
 
@@ -52,16 +67,16 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         private Button _button;
         public Text Text;
 
-        public DeveloperButton(Settings s, Transform c, string text, Action action, Action<DeveloperButton> onUpdate = null) : base(s, c)
+        public DeveloperButton(Settings s, SettingsElement l, Transform c, string text, Action action, Action<DeveloperButton> onUpdate = null) : base(s,l, c)
         {
             Setup(() =>
             {
                 _updateAction = onUpdate;
 
-                _button = _main.AddComponent<Button>();
+                _button = _main.gameObject.AddComponent<Button>();
                 _button.image = _button.gameObject.AddComponent<Image>();
                 _button.onClick.AddListener(() => action?.Invoke());
-                _button.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
+                _button.GetComponent<RectTransform>().sizeDelta = new Vector2(l.Wight, l.Height);
 
                 var t = new GameObject("Text");
                 Text = t.AddComponent<Text>();
@@ -80,9 +95,9 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                 rec.offsetMax = new Vector2(0, 0);
                 rec.offsetMin = new Vector2(0, 0);
 
-                if (_settings.Hide)
+                if (_settingsElement.Hide)
                 {
-                    _main.AddComponent<CanvasGroup>().alpha = 0;
+                    _main.gameObject.AddComponent<CanvasGroup>().alpha = 0;
                 }
 
             });
@@ -99,12 +114,12 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         public InputField InputField;
         public Text Text;
         private Action<DeveloperInputWithText> _onUpdate;
-        public DeveloperInputWithText(Settings s, Transform c, string txt, string inputText, Action<string> a, Action<DeveloperInputWithText> onUpdate) : base(s, c)
+        public DeveloperInputWithText(Settings s, SettingsElement l, Transform c, string txt, string inputText, Action<string> a, Action<DeveloperInputWithText> onUpdate) : base(s,l, c)
         {
             Setup(() =>
             {
-                var mainFrame = _main.AddComponent<Image>();
-                mainFrame.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
+                var mainFrame = _main.gameObject.AddComponent<Image>();
+                mainFrame.GetComponent<RectTransform>().sizeDelta = new Vector2(l.Wight, l.Height);
                 var g = mainFrame.gameObject.AddComponent<HorizontalLayoutGroup>();
                 g.childControlWidth = false;
                 mainFrame.gameObject.AddComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -115,7 +130,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                     textContainer.transform.SetParent(_main.transform);
 
                     var im = textContainer.AddComponent<Image>();
-                    textContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
+                    textContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(l.Wight, l.Height);
 
                     var t = new GameObject("Text");
 
@@ -136,10 +151,10 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                     rec.offsetMax = new Vector2(0, 0);
                     rec.offsetMin = new Vector2(0, 0);
 
-                    if (_settings.Hide)
+                    if (_settingsElement.Hide)
                     {
-                        _main.AddComponent<CanvasGroup>().alpha = 0;
-                    }
+                        _main.gameObject.AddComponent<CanvasGroup>().alpha = 0;
+                    }       
                 }
                 void CreateInput()
                 {
@@ -156,7 +171,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                         a?.Invoke(InputField.text);
                     });
 
-                    im.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
+                    im.GetComponent<RectTransform>().sizeDelta = new Vector2(l.Wight, l.Height);
 
                     var t = new GameObject("Text").AddComponent<Text>();
 
@@ -176,9 +191,9 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                     InputField.textComponent = t;
                     InputField.text = inputText;
 
-                    if (_settings.Hide)
+                    if (_settingsElement.Hide)
                     {
-                        _main.AddComponent<CanvasGroup>().alpha = 0;
+                        _main.gameObject.AddComponent<CanvasGroup>().alpha = 0;
                     }
                 }
 
@@ -195,26 +210,25 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             _onUpdate?.Invoke(this);
         }
     }
-
     public class DeveloperInput : DeveloperItem
     {
         public InputField InputField;
         private Action<DeveloperInput> _onUpdate;
-        public DeveloperInput(Settings s, Transform c, string txt, Action<string> a, Action<DeveloperInput> onUpdate) : base(s, c)
+        public DeveloperInput(Settings s, SettingsElement l, Transform c, string txt, Action<string> a, Action<DeveloperInput> onUpdate) : base(s,l, c)
         {
             Setup(() =>
             {
                 _onUpdate = onUpdate;
 
-                var im = _main.AddComponent<Image>();
-                InputField = _main.AddComponent<InputField>();
+                var im = _main.gameObject.AddComponent<Image>();
+                InputField = _main.gameObject.AddComponent<InputField>();
 
-                InputField.onValueChanged.AddListener((astr) =>
+                InputField.onValueChanged.AddListener((st) =>
                 {
                     a?.Invoke(InputField.text);
                 });
 
-                im.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
+                im.GetComponent<RectTransform>().sizeDelta = new Vector2(l.Wight, l.Height);
 
                 var t = new GameObject("Text").AddComponent<Text>();
 
@@ -235,9 +249,9 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                 InputField.textComponent = t;
                 InputField.text = txt;
 
-                if (_settings.Hide)
+                if (_settingsElement.Hide)
                 {
-                    _main.AddComponent<CanvasGroup>().alpha = 0;
+                    _main.gameObject.AddComponent<CanvasGroup>().alpha = 0;
                 }
             });
         }
@@ -247,21 +261,190 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             _onUpdate?.Invoke(this);
         }
     }
+    public class DeveloperConsole : DeveloperItem
+    {
+        public List<MessageContainer> Messages;
+        public ScrollRect ScrollRect;
+        private Action<DeveloperConsole> _onUpdate;
+        public DeveloperConsole(Settings s, SettingsElement l, Transform c, string txt, Action<DeveloperConsole> onUpdate) : base(s,l, c)
+        {
+           
+            Setup(() =>
+            {
+                var containerRect = c.GetComponent<RectTransform>();
 
+                _main.pivot = new Vector2(0, 1f);
+                _main.sizeDelta = new Vector2(l.ContainerWidth ? containerRect.rect.width : l.Wight, l.ContainerHeight ? containerRect.rect.height : l.Height);
+
+                ScrollRect CreateRect()
+                {
+                    var o = new GameObject("ScrollRect");
+                    o.transform.SetParent(_main.transform);
+                    var view = o.gameObject.AddComponent<ScrollRect>();
+                    var viewRect = view.gameObject.GetComponent<RectTransform>();
+
+                    viewRect.sizeDelta = new Vector2(l.ContainerWidth ? containerRect.rect.width : l.Wight, l.ContainerHeight ? containerRect.rect.height : l.Height);
+
+                    view.horizontal = false;
+
+                    var viewPort = new GameObject("ViewPort");
+                    var viewPortRect = viewPort.AddComponent<RectTransform>();
+                    viewPort.transform.SetParent(view.transform);
+                    viewPortRect.anchorMax = new Vector2(1, 1);
+                    viewPortRect.anchorMin = new Vector2(0, 0);
+                    viewPortRect.offsetMax = new Vector2(0, 0);
+                    viewPortRect.offsetMin = new Vector2(0, 0);
+                    viewPortRect.anchoredPosition = Vector3.zero;
+                    view.viewport = viewPortRect;
+
+                    var container = new GameObject("Container");
+                    container.transform.SetParent(viewPort.transform);
+                    view.content = container.AddComponent<RectTransform>();
+                    view.content.anchorMax = new Vector2(1, 1);
+                    view.content.anchorMin = new Vector2(0, 0);
+                    view.content.offsetMax = new Vector2(0, 0);
+                    view.content.offsetMin = new Vector2(0, 0);
+                    view.content.pivot = new Vector2(0, 1);
+
+                    var v = container.AddComponent<VerticalLayoutGroup>();
+                    v.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+                    v.childAlignment = TextAnchor.UpperCenter;
+                    v.childControlHeight = true;
+                    v.childControlWidth = true;
+
+                    var rect = o.GetComponent<RectTransform>();
+                    rect.pivot = new Vector3(0.5f, 1);
+                    rect.anchorMax = new Vector3(0.5f, 1);
+                    rect.anchorMin = new Vector3(0.5f, 1);
+                    rect.anchoredPosition = Vector3.zero;
+
+                    return view;
+                }
+
+                ScrollRect = CreateRect();
+
+                var m = new List<ConsoleMessage>(Instance.ConsoleMessages);
+
+                for (var index = 0; index < m.Count; index++)
+                {
+                    var instanceConsoleMessage = m[index];
+
+                    OnGetMessage(instanceConsoleMessage);
+                }
+
+                Instance.OnGetNewConsoleMessageEvent += OnGetMessage;
+
+            });
+
+
+
+        }
+
+        protected override void OnDestroy()
+        {
+            Instance.OnGetNewConsoleMessageEvent -= OnGetMessage;
+        }
+
+        public class MessageContainer : MonoBehaviour
+        {
+            public Text Text;
+            public ConsoleMessage Message;
+            public bool IsOpen;
+
+            public static MessageContainer CreateItem(ConsoleMessage m)
+            {
+                var mO = new GameObject("Message").AddComponent<MessageContainer>();
+                var txt = CreateDefaultText(mO.gameObject);
+                var but = mO.gameObject.AddComponent<Button>();
+                but.onClick.AddListener(()=> mO.OpenSwitch());
+                mO.Message = m;
+                mO.Text = txt;
+                mO.Text.fontSize = 26;
+                mO.Text.raycastTarget = true;
+                mO.Text.resizeTextForBestFit = false;
+
+                mO.Open(false);
+
+                return mO;
+            }
+
+            public void OpenSwitch()
+            {
+                Open(!IsOpen);
+            }
+            public void Open(bool a)
+            {
+                IsOpen = a;
+                Text.text = FormatText(a ? Message.text : Message.label, Message.typ);
+            }
+
+            string FormatText(string text,  LogType type, bool noColor = false)
+            {
+                
+                if (noColor)
+                {
+                    return $"[{DateTime.Now}]{text}";
+                }
+                else
+                {
+                    var color = type == LogType.Error ? Color.red :
+                        type == LogType.Exception || type == LogType.Warning || type == LogType.Assert ? Color.yellow : Color.white;
+
+                    var colorHTML = ColorUtility.ToHtmlStringRGB(color);
+
+                    return $"<color=#{colorHTML}>[{DateTime.Now}]{text}</color>";
+                }
+            }
+
+            public string GetFull()
+            {
+                return FormatText(Message.text, Message.typ,true);
+            }
+        }
+
+        private void OnGetMessage(ConsoleMessage m)
+        {
+            var mO = MessageContainer.CreateItem(m);
+            mO.transform.SetParent(ScrollRect.content);
+        }
+        public override void OnUpdate()
+        {
+            _onUpdate?.Invoke(this);
+        }
+
+        public string CopyText()
+        {
+            var str = "";
+            foreach (Transform tr in ScrollRect.content)
+            {
+                var mc = tr.gameObject.GetComponent<MessageContainer>();
+                str += mc.GetFull() + "\n";
+            }
+
+            return str;
+        }
+
+        public void ClearText()
+        {
+            Instance.ConsoleMessages.Clear();
+            ScrollRect.content.ClearChildObjects();
+        }
+    }
     public class DeveloperText : DeveloperItem
     {
         public Text Text;
 
         private Action<DeveloperText> _onUpdate;
 
-        public DeveloperText(Settings s, Transform c, string txt, bool keepOnScreen = false, Action<DeveloperText> onUpdate = null) : base(s, c)
+        public DeveloperText(Settings s, SettingsElement l, Transform c, string txt, bool keepOnScreen = false, Action<DeveloperText> onUpdate = null) : base(s,l, c)
         {
             Setup(() =>
             {
                 _onUpdate = onUpdate;
 
-                var im = _main.AddComponent<Image>();
-                im.GetComponent<RectTransform>().sizeDelta = new Vector2(s.WightHeight, s.Height);
+                var im = _main.gameObject.AddComponent<Image>();
+                im.GetComponent<RectTransform>().sizeDelta = new Vector2(l.Wight, l.Height);
 
                 var t = new GameObject("Text");
 
@@ -282,9 +465,9 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                 rec.offsetMax = new Vector2(0, 0);
                 rec.offsetMin = new Vector2(0, 0);
 
-                if (_settings.Hide)
+                if (_settingsElement.Hide)
                 {
-                    _main.AddComponent<CanvasGroup>().alpha = 0;
+                    _main.gameObject.AddComponent<CanvasGroup>().alpha = 0;
                 }
             });
         }
@@ -302,11 +485,41 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     }
     public class Settings
     {
-        public float Height = 128;
-        public float WightHeight = 256;
-        public bool KeepOnScreen;
+        public bool AlwaysOnScreen;
         public bool Hide;
     }
+    public class SettingsElement
+    {
+        public float Height;
+        public float Wight;
+        public bool ContainerWidth;
+        public bool ContainerHeight;
+        public bool Hide;
+
+        public static SettingsElement Default()
+        {
+            return new SettingsElement();
+        }
+        public SettingsElement()
+        {
+            Height = 128;
+            Wight = 256;
+            ContainerWidth = false;
+            ContainerHeight = false;
+            Hide = false;
+        }
+    }
+
+    public class ConsoleMessage
+    {
+        public string label;
+        public string text;
+        public LogType typ;
+    }
+
+
+    public Action<ConsoleMessage> OnGetNewConsoleMessageEvent;
+    public List<ConsoleMessage> ConsoleMessages { get; private set; }
 
     protected static Font Font { get; private set; }
 
@@ -326,10 +539,13 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     private float _swapTime;
     private bool _show;
 
+
+
     protected override void OnAwaken()
     {
         base.OnAwaken();
 
+        ConsoleMessages = new List<ConsoleMessage>(); 
         _items = new List<DeveloperItem>();
         _containers = new Dictionary<ContainerPosition, ScrollRect>();
         _settings = new Settings();
@@ -343,6 +559,22 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             Debug.LogError("No EventSystem in scene! Add it first");
         }
 
+        Application.logMessageReceived += OnGetMessage;
+    }
+
+
+    private void OnGetMessage(string label, string text, LogType type)
+    {
+        var mes = new ConsoleMessage()
+        {
+            label = label,
+            text = text,
+            typ = type
+        };
+
+        ConsoleMessages.Add(mes);
+
+        OnGetNewConsoleMessageEvent?.Invoke(mes);
     }
 
 
@@ -407,6 +639,48 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         return view;
     }
 
+    public static Button CreateDefaultButton(GameObject tr)
+    {
+
+        var button = tr.gameObject.AddComponent<Button>();
+        button.image = button.gameObject.AddComponent<Image>();
+
+        var txt = tr.gameObject.AddComponent<Text>();
+        txt.resizeTextForBestFit = true;
+        txt.transform.SetParent(button.transform);
+        txt.color = Color.black;
+        txt.font = Font;
+        txt.alignment = TextAnchor.MiddleCenter;
+        txt.raycastTarget = false;
+        txt.color = Color.white;
+        var rec = txt.GetComponent<RectTransform>();
+        rec.anchorMax = new Vector2(1, 1);
+        rec.anchorMin = new Vector2(0, 0);
+
+        rec.offsetMax = new Vector2(0, 0);
+        rec.offsetMin = new Vector2(0, 0);
+
+        return button;
+    }
+    public static Text CreateDefaultText(GameObject tr)
+    {
+        var txt = tr.gameObject.AddComponent<Text>();
+        txt.resizeTextForBestFit = true;
+        txt.transform.SetParent(tr.transform);
+        txt.color = Color.black;
+        txt.font = Font;
+        txt.alignment = TextAnchor.MiddleCenter;
+        txt.raycastTarget = false;
+        txt.color = Color.white;
+        var rec = txt.GetComponent<RectTransform>();
+        rec.anchorMax = new Vector2(1, 1);
+        rec.anchorMin = new Vector2(0, 0);
+
+        rec.offsetMax = new Vector2(0, 0);
+        rec.offsetMin = new Vector2(0, 0);
+
+        return txt;
+    }
     /*   protected DeveloperItem CreateFps()
        {
            var b = AddText("Fps : ", ContainerPosition.Middle);
@@ -421,19 +695,52 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         OpenPage(new List<DeveloperItem>()
         {
             // AddButton("", Main, hide:true)
-        }, showClose: false);
+        }, main: false);
     }
-    protected virtual void Main()
+
+    private void ShowUtils()
     {
-        var c = AddText("Scene : ");
+        OpenPage(new List<DeveloperItem>()
+        {
+            AddButton("Console", ShowConsole),
+            AddText("Ver." + Application.version)
+        });
+    }
+    private void ShowConsole()
+    {
+        var с = AddConsole("Console", pos: ContainerPosition.Middle);
 
         OpenPage(new List<DeveloperItem>()
-       {
-           AddText("Welcome")
-       });
+        {
+            с,
+            AddButton("Copy", ()=>
+            {
+                GUIUtility.systemCopyBuffer = с.CopyText();
+            },pos:ContainerPosition.Left),
+            AddButton("Clear", ()=>
+            {
+                с.ClearText();
+            },pos:ContainerPosition.Left),
+
+        });
+    }
+
+    protected virtual void Main()
+    {
+        //  var c = AddText("Scene : ");
+
+        OpenPage(new List<DeveloperItem>()
+        {
+            AddText("Welcome")
+        },main:false);
 
     }
 
+
+    public virtual void OnShowMain()
+    {
+
+    }
 
 
     public void Clear()
@@ -445,23 +752,23 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         _items.Clear();
     }
 
-    protected virtual void OpenPage(List<DeveloperItem> list, ContainerPosition pos = ContainerPosition.Left, bool showClose = true)
+    protected virtual void OpenPage(List<DeveloperItem> list, ContainerPosition pos = ContainerPosition.Left, bool main = true)
     {
         Clear();
 
-        /*var fps = CreateFpsInMiddle();
+        /*var fps 
 
         list.Add(fps);
         */
-        if (showClose)
+        if (main)
         {
             list.Add(AddButton("Back", Main));
         }
 
         if (list.Count > 0)
         {
+            list.Add(AddButton("Utils", ShowUtils));
             list.Add(AddButton("Exit", ShowHideSwitch));
-            list.Add(AddText(Application.version));
         }
 
 
@@ -478,27 +785,48 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         _items = list;
     }
 
-    protected DeveloperInput AddInputField(string text, ContainerPosition pos = ContainerPosition.Left, Action<string> a = null, Action<DeveloperInput> onUpdate = null)
+    protected DeveloperInput AddInputField( string text, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<string> a = null, Action<DeveloperInput> onUpdate = null)
     {
-        var b = new DeveloperInput(_settings, _containers[pos].content, text, a, onUpdate);
+        el ??= SettingsElement.Default();
+
+        var b = new DeveloperInput(_settings, el, _containers[pos].content, text, a, onUpdate);
 
         return b;
     }
-    protected DeveloperInputWithText AddTextWithInputField(object text, object inputText = null, ContainerPosition pos = ContainerPosition.Left, Action<string> a = null, Action<DeveloperInputWithText> onUpdate = null)
+    protected DeveloperInputWithText AddTextWithInputField(object text, SettingsElement el = null, object inputText = null, ContainerPosition pos = ContainerPosition.Left, Action<string> a = null, Action<DeveloperInputWithText> onUpdate = null)
     {
-        var b = new DeveloperInputWithText(_settings, _containers[pos].content, text.ToString(), inputText?.ToString() ?? "", a, onUpdate);
+        el ??= SettingsElement.Default();
+
+        var b = new DeveloperInputWithText(_settings, el, _containers[pos].content, text.ToString(), inputText?.ToString() ?? "", a, onUpdate);
 
         return b;
     }
-    protected DeveloperButton AddButton(string text, Action a = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperButton> onUpdate = null)
+    protected DeveloperConsole AddConsole( string text, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperConsole> onUpdate = null)
     {
-        var b = new DeveloperButton(_settings, _containers[pos].content, text, a, onUpdate: onUpdate);
+        if (el == null)
+        {
+            el = new SettingsElement();
+            el.ContainerHeight = true;
+            el.ContainerWidth = true;
+        }
+
+        var b = new DeveloperConsole(_settings, el, _containers[pos].content, text, onUpdate: onUpdate);
 
         return b;
     }
-    protected DeveloperText AddText(string text, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperText> onUpdate = null)
+    protected DeveloperButton AddButton(string text,  Action a = null, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperButton> onUpdate = null)
     {
-        var b = new DeveloperText(_settings, _containers[pos].content, text, onUpdate: onUpdate);
+        el ??= SettingsElement.Default();
+
+        var b = new DeveloperButton(_settings, el, _containers[pos].content, text, a, onUpdate: onUpdate);
+
+        return b;
+    }
+    protected DeveloperText AddText( string text, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperText> onUpdate = null)
+    {
+        el ??= SettingsElement.Default();
+
+        var b = new DeveloperText(_settings,el, _containers[pos].content, text, onUpdate: onUpdate);
 
         return b;
     }
