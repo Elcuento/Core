@@ -9,24 +9,23 @@ namespace JTI.Examples
         {
             base.OnAwaken();
 
-            Debug.LogError("AA");
         }
 
-        protected override void Main()
+        protected override List<DeveloperItem> MainPage()
         {
-            OpenPage(new List<DeveloperItem>()
+            return new List<DeveloperItem>()
             {
-                 AddText("Just text", onUpdate: (b) => { b.Text.text = Random.Range(0, 99).ToString(); }),
- 
-                 AddButton("Just button ", () => { Debug.Log("I am just a button after all.."); }),
- 
-                 AddButton("Page 1", Page1),
-                 AddButton("Page 2", Page2),
- 
-                 AddInputField("Page 2", a: (a) => { Debug.Log(a); }),
- 
-                 AddTextWithInputField("Page 2", a: (a) => { Debug.Log(a); })
-            });
+                AddText("Just text", onUpdate: (b) => { b.Text.text = Random.Range(0, 99).ToString(); }),
+
+                AddButton("Just button ", () => { Debug.Log("I am just a button after all.."); }),
+
+                AddButton("Page 1", Page1),
+                AddButton("Page 2", Page2),
+
+                AddInputField("Page 2", a: (a) => { Debug.Log(a); }),
+
+                AddTextWithInputField("Page 2", a: (a) => { Debug.Log(a); })
+            };
         }
 
         private void Page1()

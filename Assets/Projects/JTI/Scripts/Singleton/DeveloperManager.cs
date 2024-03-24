@@ -274,7 +274,8 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                 var containerRect = c.GetComponent<RectTransform>();
 
                 _main.pivot = new Vector2(0, 1f);
-                _main.sizeDelta = new Vector2(l.ContainerWidth ? containerRect.rect.width : l.Wight, l.ContainerHeight ? containerRect.rect.height : l.Height);
+                _main.sizeDelta = new Vector2(l.ContainerWidth ? containerRect.rect.width : l.Wight,
+                    l.ContainerHeight ? Mathf.Abs(containerRect.sizeDelta.y) : l.Height);
 
                 ScrollRect CreateRect()
                 {
@@ -283,7 +284,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                     var view = o.gameObject.AddComponent<ScrollRect>();
                     var viewRect = view.gameObject.GetComponent<RectTransform>();
 
-                    viewRect.sizeDelta = new Vector2(l.ContainerWidth ? containerRect.rect.width : l.Wight, l.ContainerHeight ? containerRect.rect.height : l.Height);
+                    viewRect.sizeDelta = _main.sizeDelta;
 
                     view.horizontal = false;
 
@@ -725,21 +726,16 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         });
     }
 
-    protected virtual void Main()
+    private void Main()
     {
         //  var c = AddText("Scene : ");
-
-        OpenPage(new List<DeveloperItem>()
-        {
-            AddText("Welcome")
-        },main:false);
-
+        OpenPage(MainPage(), main:false);
     }
 
 
-    public virtual void OnShowMain()
+    protected virtual List<DeveloperItem> MainPage()
     {
-
+        return new List<DeveloperItem>();
     }
 
 
