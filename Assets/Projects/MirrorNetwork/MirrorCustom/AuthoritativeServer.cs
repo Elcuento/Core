@@ -41,7 +41,11 @@ namespace MirrorNetwork
 
             public void Disconnected()
             {
-                Destroy(NetworkHandlerController.gameObject);
+                if (NetworkHandlerController != null)
+                {
+                    Destroy(NetworkHandlerController.gameObject);
+                }
+              
                 OnDisconnectEvent?.Invoke();
             }
         }
