@@ -377,7 +377,8 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             public void Open(bool a)
             {
                 IsOpen = a;
-                Text.text = FormatText(a ? Message.text : Message.label, Message.typ);
+                Text.text = FormatText(a ? Message.text : Message.text.Length > 0 ? 
+                    Message.text.Substring(0, Mathf.Clamp(Message.text.Length,0,100)) : "No text", Message.typ);
             }
 
             string FormatText(string text,  LogType type, bool noColor = false)
@@ -406,8 +407,12 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
         private void OnGetMessage(ConsoleMessage m)
         {
+            if (m.typ == LogType.Warning)
+                return;
+
             var mO = MessageContainer.CreateItem(m);
             mO.transform.SetParent(ScrollRect.content);
+            mO.transform.SetAsFirstSibling();
         }
         public override void OnUpdate()
         {
@@ -513,7 +518,6 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     public class ConsoleMessage
     {
-        public string label;
         public string text;
         public LogType typ;
     }
@@ -568,7 +572,6 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     {
         var mes = new ConsoleMessage()
         {
-            label = label,
             text = text,
             typ = type
         };
@@ -703,6 +706,10 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     {
         OpenPage(new List<DeveloperItem>()
         {
+            AddText("FPS", onUpdate: (f) =>
+            {
+                f.Text.text = "FPS" + PerformanceManager.Instance.AverageFps.ToString();
+            } ),
             AddButton("Console", ShowConsole),
             AddText("Ver." + Application.version)
         });

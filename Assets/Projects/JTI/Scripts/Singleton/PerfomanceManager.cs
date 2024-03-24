@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace JTI.Scripts.Managers
 {
-    public class PerformanceManager : SingletonMonoSimple<PerformanceManager>
+    public class PerformanceManager : SingletonMono<PerformanceManager>
     {
         public const int CriticalFps = 10;
 
@@ -20,7 +20,6 @@ namespace JTI.Scripts.Managers
         {
             Update();
         }
-
 
         private void Update()
         {
