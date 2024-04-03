@@ -4,6 +4,20 @@ namespace JTI.Examples
 {
     public class PositionAndRotationHelper : MonoBehaviour
     {
+        public static float CalculateAngle(Vector3 dir, Vector3 from, Vector3 to)
+        {
+            var direction = (to - from).normalized;
+            var angle = Vector3.Angle(dir, direction);
+
+            var cross = Vector3.Cross(dir, direction);
+
+            var sign = Mathf.Sign(Vector3.Dot(cross, Vector3.up));
+
+            var fullAngle = angle * sign;
+
+            return fullAngle;
+        }
+
         public static Vector3 GetMousePositionTo3D(Camera camera, Vector2 position, float zPos)
         {
             Vector3 mousePosition = position;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using JTI.Scripts.Common;
 using JTI.Scripts.Managers;
 using UnityEngine;
@@ -12,7 +13,6 @@ using Cursor = UnityEngine.Cursor;
 using Debug = UnityEngine.Debug;
 using Image = UnityEngine.UI.Image;
 using Text = UnityEngine.UI.Text;
-
 public class DeveloperManager : SingletonMono<DeveloperManager>
 {
     public class DeveloperItem
@@ -60,14 +60,13 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
         }
     }
-
     public class DeveloperButton : DeveloperItem
     {
         private Action<DeveloperButton> _updateAction;
         private Button _button;
         public Text Text;
 
-        public DeveloperButton(Settings s, SettingsElement l, Transform c, string text, Action action, Action<DeveloperButton> onUpdate = null) : base(s,l, c)
+        public DeveloperButton(Settings s, SettingsElement l, Transform c, string text, Action action, Action<DeveloperButton> onUpdate = null) : base(s, l, c)
         {
             Setup(() =>
             {
@@ -114,7 +113,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         public InputField InputField;
         public Text Text;
         private Action<DeveloperInputWithText> _onUpdate;
-        public DeveloperInputWithText(Settings s, SettingsElement l, Transform c, string txt, string inputText, Action<string> a, Action<DeveloperInputWithText> onUpdate) : base(s,l, c)
+        public DeveloperInputWithText(Settings s, SettingsElement l, Transform c, string txt, string inputText, Action<string> a, Action<DeveloperInputWithText> onUpdate) : base(s, l, c)
         {
             Setup(() =>
             {
@@ -154,7 +153,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                     if (_settingsElement.Hide)
                     {
                         _main.gameObject.AddComponent<CanvasGroup>().alpha = 0;
-                    }       
+                    }
                 }
                 void CreateInput()
                 {
@@ -214,7 +213,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     {
         public InputField InputField;
         private Action<DeveloperInput> _onUpdate;
-        public DeveloperInput(Settings s, SettingsElement l, Transform c, string txt, Action<string> a, Action<DeveloperInput> onUpdate) : base(s,l, c)
+        public DeveloperInput(Settings s, SettingsElement l, Transform c, string txt, Action<string> a, Action<DeveloperInput> onUpdate) : base(s, l, c)
         {
             Setup(() =>
             {
@@ -266,9 +265,9 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         public List<MessageContainer> Messages;
         public ScrollRect ScrollRect;
         private Action<DeveloperConsole> _onUpdate;
-        public DeveloperConsole(Settings s, SettingsElement l, Transform c, string txt, Action<DeveloperConsole> onUpdate) : base(s,l, c)
+        public DeveloperConsole(Settings s, SettingsElement l, Transform c, string txt, Action<DeveloperConsole> onUpdate) : base(s, l, c)
         {
-           
+
             Setup(() =>
             {
                 var containerRect = c.GetComponent<RectTransform>();
@@ -358,7 +357,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                 var mO = new GameObject("Message").AddComponent<MessageContainer>();
                 var txt = CreateDefaultText(mO.gameObject);
                 var but = mO.gameObject.AddComponent<Button>();
-                but.onClick.AddListener(()=> mO.OpenSwitch());
+                but.onClick.AddListener(() => mO.OpenSwitch());
                 mO.Message = m;
                 mO.Text = txt;
                 mO.Text.fontSize = 26;
@@ -377,13 +376,13 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             public void Open(bool a)
             {
                 IsOpen = a;
-                Text.text = FormatText(a ? Message.text : Message.text.Length > 0 ? 
-                    Message.text.Substring(0, Mathf.Clamp(Message.text.Length,0,100)) : "No text", Message.typ);
+                Text.text = FormatText(a ? Message.text : Message.text.Length > 0 ?
+                                        Message.text.Substring(0, Mathf.Clamp(Message.text.Length, 0, 100)) : "No text", Message.typ);
             }
 
-            string FormatText(string text,  LogType type, bool noColor = false)
+            string FormatText(string text, LogType type, bool noColor = false)
             {
-                
+
                 if (noColor)
                 {
                     return $"[{DateTime.Now}]{text}";
@@ -401,15 +400,12 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
             public string GetFull()
             {
-                return FormatText(Message.text, Message.typ,true);
+                return FormatText(Message.text, Message.typ, true);
             }
         }
 
         private void OnGetMessage(ConsoleMessage m)
         {
-            if (m.typ == LogType.Warning)
-                return;
-
             var mO = MessageContainer.CreateItem(m);
             mO.transform.SetParent(ScrollRect.content);
             mO.transform.SetAsFirstSibling();
@@ -443,7 +439,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
         private Action<DeveloperText> _onUpdate;
 
-        public DeveloperText(Settings s, SettingsElement l, Transform c, string txt, bool keepOnScreen = false, Action<DeveloperText> onUpdate = null) : base(s,l, c)
+        public DeveloperText(Settings s, SettingsElement l, Transform c, string txt, bool keepOnScreen = false, Action<DeveloperText> onUpdate = null) : base(s, l, c)
         {
             Setup(() =>
             {
@@ -522,42 +518,41 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         public LogType typ;
     }
 
+    [SerializeField] private bool _showOnStart;
 
     public Action<ConsoleMessage> OnGetNewConsoleMessageEvent;
     public List<ConsoleMessage> ConsoleMessages { get; private set; }
 
+    public bool IsEnable { get; private set; }
     protected static Font Font { get; private set; }
 
     protected Settings _settings;
-
-    protected virtual void CreateFont()
-    {
-        Font = Font.CreateDynamicFontFromOSFont("Arial", 1);
-    }
 
     private Canvas _canvas;
 
     private Dictionary<ContainerPosition, ScrollRect> _containers;
     private List<DeveloperItem> _items;
-
-    private Vector2 _prevMousePos;
-    private float _swapTime;
     private bool _show;
 
+    private long _logBufferSize = 3600000;
+    private long _currentLogBufferSize;
 
-
+    protected virtual void CreateFont()
+    {
+        Font = Font.CreateDynamicFontFromOSFont("Arial", 1);
+    }
     protected override void OnAwaken()
     {
         base.OnAwaken();
 
-        ConsoleMessages = new List<ConsoleMessage>(); 
+        ConsoleMessages = new List<ConsoleMessage>();
         _items = new List<DeveloperItem>();
         _containers = new Dictionary<ContainerPosition, ScrollRect>();
         _settings = new Settings();
 
         CreateFont();
         Check();
-        ShowHide(false);
+        ShowHide(_showOnStart);
 
         if (EventSystem.current == null)
         {
@@ -565,20 +560,57 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         }
 
         Application.logMessageReceived += OnGetMessage;
+
+        var logText = "";
+
+        try
+        {
+            logText = File.ReadAllText(Application.persistentDataPath + "/Logs.txt");
+            _currentLogBufferSize = logText.Length;
+        }
+        catch (Exception e)
+        {
+            if (logText.Length > 36000)
+            {
+                File.Delete(Application.persistentDataPath + "/Logs.txt");
+            }
+        }
+
     }
 
+    public void SetLogBufferSize(long logBufferSize)
+    {
+        _logBufferSize = logBufferSize;
+    }
 
     private void OnGetMessage(string label, string text, LogType type)
     {
         var mes = new ConsoleMessage()
         {
-            text = text,
+            text = text.Length > 0 ? text : label,
             typ = type
         };
+
+        _currentLogBufferSize += (label + text).Length;
 
         ConsoleMessages.Add(mes);
 
         OnGetNewConsoleMessageEvent?.Invoke(mes);
+
+        try
+        {
+            if (_currentLogBufferSize > _logBufferSize)
+            {
+                File.Delete(Application.persistentDataPath + "/Logs.txt");
+                _currentLogBufferSize = 0;
+            }
+
+            File.AppendAllText(Application.persistentDataPath + "/Logs.txt", "\n" + $"[{DateTime.Now}][{type}][{label}]\n{text}");
+        }
+        catch (Exception e)
+        {
+            // ignored
+        }
     }
 
 
@@ -736,13 +768,16 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     private void Main()
     {
         //  var c = AddText("Scene : ");
-        OpenPage(MainPage(), main:false);
+        OpenPage(MainPage(), main: false);
     }
 
 
     protected virtual List<DeveloperItem> MainPage()
     {
-        return new List<DeveloperItem>();
+        return new List<DeveloperItem>()
+        {
+            AddText("Main Page"),
+        };
     }
 
 
@@ -788,7 +823,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         _items = list;
     }
 
-    protected DeveloperInput AddInputField( string text, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<string> a = null, Action<DeveloperInput> onUpdate = null)
+    protected DeveloperInput AddInputField(string text, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<string> a = null, Action<DeveloperInput> onUpdate = null)
     {
         el ??= SettingsElement.Default();
 
@@ -804,7 +839,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
         return b;
     }
-    protected DeveloperConsole AddConsole( string text, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperConsole> onUpdate = null)
+    protected DeveloperConsole AddConsole(string text, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperConsole> onUpdate = null)
     {
         if (el == null)
         {
@@ -817,7 +852,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
         return b;
     }
-    protected DeveloperButton AddButton(string text,  Action a = null, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperButton> onUpdate = null)
+    protected DeveloperButton AddButton(string text, Action a = null, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperButton> onUpdate = null)
     {
         el ??= SettingsElement.Default();
 
@@ -825,11 +860,11 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
         return b;
     }
-    protected DeveloperText AddText( string text, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperText> onUpdate = null)
+    protected DeveloperText AddText(string text, SettingsElement el = null, ContainerPosition pos = ContainerPosition.Left, Action<DeveloperText> onUpdate = null)
     {
         el ??= SettingsElement.Default();
 
-        var b = new DeveloperText(_settings,el, _containers[pos].content, text, onUpdate: onUpdate);
+        var b = new DeveloperText(_settings, el, _containers[pos].content, text, onUpdate: onUpdate);
 
         return b;
     }
@@ -842,36 +877,16 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     private void Update()
     {
+        if (!IsEnable)
+            return;
+
         if (Application.isMobilePlatform)
         {
-            if (Input.GetKeyDown(KeyCode.Mouse0))
-            {
-                _prevMousePos = Input.mousePosition;
-                _swapTime = Time.time + 0.3f;
-
-            }
-
             if (Input.touchCount == 5)
             {
                 ShowHide(true);
                 Main();
             }
-            /*   if (Input.GetKeyUp(KeyCode.Mouse0))
-               {
-                   var dir = (Vector2)Input.mousePosition - _prevMousePos;
-                   if (dir.magnitude < Screen.height / 2f && _swapTime > Time.time)
-                   {
-                       if (Vector2.Angle(dir.normalized, Vector2.down) < 15)
-                       {
-                           if (!_show)
-                           {
-                               ShowHide();
-                               Main();
-                           }
-                       }
-                   }
-
-               }*/
         }
         else
         {
@@ -888,8 +903,6 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                 ShowHideSwitch();
                 Main();
             }
-
-
         }
 
 
@@ -914,6 +927,9 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     public void ShowHide(bool s)
     {
+        if (!IsEnable)
+            return;
+
         _show = s;
 
         if (_show)
@@ -926,5 +942,10 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         }
 
         Cursor.lockState = _show ? CursorLockMode.None : _prevCursorState;
+    }
+
+    public void Enable(bool en)
+    {
+        IsEnable = en;
     }
 }
