@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+
 using JTI.Scripts.Common;
 using JTI.Scripts.Managers;
 using UnityEngine;
@@ -664,9 +665,17 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         view.content.offsetMin = new Vector2(0, 0);
         view.content.pivot = new Vector2(0, 1);
 
-        var v = container.AddComponent<VerticalLayoutGroup>();
-        v.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        var back = view.content.gameObject.AddComponent<Image>();
 
+        back.raycastTarget = false;
+        var backC = Color.black;
+        back.color = new Color(backC.r, backC.g, backC.b, 0.4f);
+
+        var v = container.AddComponent<VerticalLayoutGroup>();
+        var csF = v.gameObject.AddComponent<ContentSizeFitter>();
+        csF.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        v.spacing = 5;
         v.childControlHeight = false;
         v.childControlWidth = false;
 
@@ -771,6 +780,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     private void Main()
     {
+        //  var c = AddText("Scene : ");
         OpenPage(MainPage(), main: false);
     }
 
@@ -797,6 +807,10 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     {
         Clear();
 
+        /*var fps 
+
+        list.Add(fps);
+        */
         if (main)
         {
             list.Add(AddButton("Back", Main));
@@ -939,6 +953,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     public void Enable(bool en)
     {
         IsEnable = en;
+        //  Debug.Log("Debug set " + GameManager.Instance.IsDebug);
     }
 
 
