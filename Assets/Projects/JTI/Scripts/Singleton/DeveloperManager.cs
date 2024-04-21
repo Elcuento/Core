@@ -376,7 +376,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             public void Open(bool a)
             {
                 IsOpen = a;
-                Text.text = FormatText(a ? Message.text : Message.text.Length > 0 ?
+                Text.text = FormatText(a ? Message.FullText : Message.label.Length > 0 ? Message.label : Message.text.Length > 0 ?
                                         Message.text.Substring(0, Mathf.Clamp(Message.text.Length, 0, 100)) : "No text", Message.typ);
             }
 
@@ -400,7 +400,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
             public string GetFull()
             {
-                return FormatText(Message.text, Message.typ, true);
+                return FormatText(Message.FullText, Message.typ, true);
             }
         }
 
@@ -514,8 +514,11 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     public class ConsoleMessage
     {
+        public string label;
         public string text;
         public LogType typ;
+
+        public string FullText => label + "\n" + text;
     }
 
     [SerializeField] private bool _showOnStart;
@@ -523,7 +526,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     public Action<ConsoleMessage> OnGetNewConsoleMessageEvent;
     public List<ConsoleMessage> ConsoleMessages { get; private set; }
 
-    public bool IsEnable { get; private set; }
+    public bool IsEnable { get; private set; } = true;
     protected static Font Font { get; private set; }
 
     protected Settings _settings;
@@ -587,7 +590,8 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     {
         var mes = new ConsoleMessage()
         {
-            text = text.Length > 0 ? text : label,
+            label = label,
+            text = text,
             typ = type
         };
 
@@ -767,7 +771,6 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     private void Main()
     {
-        //  var c = AddText("Scene : ");
         OpenPage(MainPage(), main: false);
     }
 
@@ -794,10 +797,6 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     {
         Clear();
 
-        /*var fps 
-
-        list.Add(fps);
-        */
         if (main)
         {
             list.Add(AddButton("Back", Main));
@@ -884,21 +883,15 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         {
             if (Input.touchCount == 5)
             {
-                ShowHideSwitch();
+                ShowHide(true);
+                Main();
             }
         }
         else
         {
+
             if (Input.GetKeyUp(KeyCode.Tilde) || Input.GetKeyUp(KeyCode.Tab))
             {
-                if (!_show)
-                {
-                    if (_prevCursorState != CursorLockMode.Locked)
-                    {
-                        _prevCursorState = Cursor.lockState;
-                    }
-                }
-
                 ShowHideSwitch();
             }
         }
@@ -913,8 +906,6 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
 
     }
-
-    private CursorLockMode _prevCursorState;
 
     public void ShowHideSwitch()
     {
@@ -939,11 +930,16 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             ShowMinimize();
         }
 
-        Cursor.lockState = _show ? CursorLockMode.None : _prevCursorState;
+        if (_show)
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
     }
 
     public void Enable(bool en)
     {
         IsEnable = en;
     }
+
+
 }
