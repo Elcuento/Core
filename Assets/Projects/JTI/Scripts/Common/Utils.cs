@@ -423,6 +423,16 @@ namespace JTI.Scripts.Common
             foreach (Transform child in transform)
                 Object.Destroy(child.gameObject);
         }
+        public static void SetLayerToAll(this GameObject obj, Enum layer)
+        {
+            var c = obj.GetComponentsInChildren<Transform>(true);
+            foreach (var transform in c)
+            {
+                transform.gameObject.layer = Convert.ToInt32(layer);
+            }
+        }
+
+
         public static void SetLayerToAll(this GameObject obj, int layer)
         {
             var c = obj.GetComponentsInChildren<Transform>(true);

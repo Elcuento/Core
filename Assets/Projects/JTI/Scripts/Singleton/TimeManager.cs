@@ -79,6 +79,12 @@ namespace JTI.Scripts.Managers
             if (!isPause)
                 Now = DateTime.UtcNow;
         }
+        public DateTimeOffset ToDateTimeOffset(DateTime dateTime)
+        {
+            return dateTime.ToUniversalTime() <= DateTimeOffset.MinValue.UtcDateTime
+                ? DateTimeOffset.MinValue
+                : new DateTimeOffset(dateTime);
+        }
 
         private void Update()
         {
@@ -89,7 +95,7 @@ namespace JTI.Scripts.Managers
                 var timestamp = DateTime.UtcNow.Ticks;
                 Now = new DateTime(timestamp, DateTimeKind.Utc);
 
-                NowUnixSeconds = new DateTimeOffset(Now).ToUnixTimeSeconds() + NowUnixSecondsExtra;
+                NowUnixSeconds = ToDateTimeOffset(Now).ToUnixTimeSeconds() + NowUnixSecondsExtra;
                 // EventManager.Instance.Publish(new UnscaledSecondsTickEvent());
                 _unscaledSecondsTimerValue = 1f;
             }

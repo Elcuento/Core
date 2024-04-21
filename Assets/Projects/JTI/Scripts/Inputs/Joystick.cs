@@ -2,6 +2,7 @@
 using System.Linq;
 using JTI.Examples;
 using JTI.Scripts.Common;
+using UnityEditor.MPE;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -11,6 +12,8 @@ namespace JTI.Scripts
     public class Joystick : MonoBehaviour
     {
         public UnityEvent<Vector2> MoveEvent;
+        public UnityEvent ReleaseEvent;
+        public UnityEvent PressEvent;
         public static List<Joystick> Instance
         {
             get
@@ -97,8 +100,9 @@ namespace JTI.Scripts
             {
                 _alpha.alpha = 1;
             }
-
             _isPressed = true;
+
+            PressEvent?.Invoke();
 
         }
 
@@ -151,6 +155,9 @@ namespace JTI.Scripts
             _handler.transform.localPosition = Vector3.zero;
 
             MoveEvent?.Invoke(Axis);
+            ReleaseEvent?.Invoke();
         }
+
+
     }
 }

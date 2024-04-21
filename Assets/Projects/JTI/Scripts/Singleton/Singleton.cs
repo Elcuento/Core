@@ -94,6 +94,14 @@ namespace JTI.Scripts.Managers
         {
             return _instance != null;
         }
+        public static void CreateInstance<B>() where B : SingletonMono<T>
+        {
+            if (IsExist()) return;
+
+            var gO = new GameObject(typeof(B).Name);
+
+            gO.AddComponent<B>();
+        }
 
         public void Touch()
         {

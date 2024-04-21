@@ -884,8 +884,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         {
             if (Input.touchCount == 5)
             {
-                ShowHide(true);
-                Main();
+                ShowHideSwitch();
             }
         }
         else
@@ -901,7 +900,6 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
                 }
 
                 ShowHideSwitch();
-                Main();
             }
         }
 
