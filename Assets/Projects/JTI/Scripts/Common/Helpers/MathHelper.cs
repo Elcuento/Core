@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace JTI.Examples
 {
-    public  static class MathHelper : MonoBehaviour
+    public  static class MathHelper
     {
         public class PercentDrop<T>
         {
