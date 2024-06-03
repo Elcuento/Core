@@ -33,6 +33,16 @@ namespace JTI.Scripts
             _click = true;
         }
 
+        private void OnDisable()
+        {
+            if (_click)
+            {
+                Press();
+                _click = false;
+                _forceClick = false;
+            }
+        }
+
         private void Update()
         {
             if (Application.isMobilePlatform)

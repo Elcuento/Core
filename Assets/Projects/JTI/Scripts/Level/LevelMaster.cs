@@ -124,6 +124,14 @@ namespace JTI.Scripts.Level
                     break;
             }
 
+            foreach (var levelBehaviour in LevelBehaviourList)
+            {
+                if (levelBehaviour != null)
+                {
+                    levelBehaviour.ChangeState(CurrentState);
+                }
+            }
+
             _subscriber.Publish(new LevelChangeStateEvent(this, state));
 
             OnChangeState(state);

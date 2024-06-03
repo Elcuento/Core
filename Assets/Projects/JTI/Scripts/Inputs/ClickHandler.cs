@@ -24,6 +24,11 @@ namespace JTI.Scripts
 
         private Touch _touch;
 
+        private void OnDisable()
+        {
+            PressUp();
+        }
+
         private void Start()
         {
             if (_raycaster == null)

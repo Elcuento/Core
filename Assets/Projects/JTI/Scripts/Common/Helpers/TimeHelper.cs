@@ -58,7 +58,27 @@ namespace JTI.Examples
 
             return final;
         }
+        public static int GetDaysCount(long timeLeft)
+        {
+            var date = new DateTime();
+            date = date.AddSeconds(timeLeft);
 
+            return date.Day - 1;
+        }
+        public static int GetHoursCount(long timeLeft)
+        {
+            var date = new DateTime();
+            date = date.AddSeconds(timeLeft);
+
+            return (date.Day - 1) * 24 + date.Hour;
+        }
+        public static int GetMinutesCount(long timeLeft)
+        {
+            var date = new DateTime();
+            date = date.AddSeconds(timeLeft);
+
+            return ((date.Day - 1) * 24 + date.Hour) * 60 + date.Minute;
+        }
         public static string FormatTimeLeftNumberDHMS(long timeLeft, bool showHour = true, bool showDays = true,
                 bool showMinutes = false, bool showSecond = false) // d/h
             // 00:00:00:00
