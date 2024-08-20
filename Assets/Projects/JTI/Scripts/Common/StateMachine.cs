@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace JTI.Scripts.Common
 {
@@ -10,7 +11,7 @@ namespace JTI.Scripts.Common
         {
             if (CurrentState != null)
             {
-                EndState();
+                EndState(true);
             }
 
             CurrentState = state;
@@ -19,7 +20,7 @@ namespace JTI.Scripts.Common
 
         public void StopState()
         {
-			if (CurrentState == null || CurrentState.IsEnded) return;
+            if (CurrentState == null || CurrentState.IsEnded) return;
 
             CurrentState.Stop();
         }
@@ -29,27 +30,27 @@ namespace JTI.Scripts.Common
             if (CurrentState == null || CurrentState.IsEnded) return;
 
             CurrentState.Update();
-		}
+        }
 
-        public void EndState()
+        public void EndState(bool change)
         {
             if (CurrentState == null || CurrentState.IsEnded) return;
 
-            CurrentState.End();
+            CurrentState.End(change);
         }
     }
-	public class State
+    public class State
     {
-        public Action OnEndEvent;
+        public Action<bool> OnEndEvent;
         public bool IsEnded;
 
-        public void End()
+        public void End(bool stopped = false)
         {
             if (IsEnded) return;
 
             IsEnded = true;
-            OnEndEvent?.Invoke();
-            OnEnd();
+            OnEnd(stopped);
+            OnEndEvent?.Invoke(stopped);
         }
 
         public void Start()
@@ -67,11 +68,11 @@ namespace JTI.Scripts.Common
             OnStop();
         }
 
-		public virtual void OnUpdate()
+        public virtual void OnUpdate()
         {
 
         }
-        public virtual void OnEnd()
+        public virtual void OnEnd(bool a)
         {
 
         }
@@ -82,9 +83,9 @@ namespace JTI.Scripts.Common
         }
         public virtual void OnStop()
         {
-           
+
         }
 
 
-	}
+    }
 }

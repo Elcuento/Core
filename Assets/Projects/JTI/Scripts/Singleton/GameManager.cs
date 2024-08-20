@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.JTI.Scripts.Events.Game;
 using JTI.Scripts.Events;
 using JTI.Scripts.Events.Game;
@@ -58,7 +59,10 @@ namespace JTI.Scripts.Managers
             GameControllers.Add(b);
             return b;
         }
-
+        public T GetController<T>()
+        {
+            return (T)GameControllers.FirstOrDefault(x => x is T);
+        }
         public T AddController<T>(T c) where T : MonoBehaviour, IController
         {
             c.SetManager(this);
@@ -76,7 +80,10 @@ namespace JTI.Scripts.Managers
 
             Initialize();
         }
-
+        public T GetInstance<T>() where T : GameManager
+        {
+            return this as T;
+        }
         protected virtual void InstallControllers()
         {
            
@@ -121,7 +128,7 @@ namespace JTI.Scripts.Managers
 
             _controllersToInstall = null;
         }
-
+   
         private void InitializeControllers()
         {
             foreach (var gameController in GameControllers)

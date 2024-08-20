@@ -17,7 +17,14 @@ namespace JTI.Examples
 
             return fullAngle;
         }
+        private float GetNegativeAngle(Vector3 vectorA, Vector3 vectorB)
+        {
+            var angle = Vector3.Angle(vectorA, vectorB);
+            var cross = Vector3.Cross(vectorA, vectorB);
+            if (cross.y < 0) angle = -angle;
 
+            return angle;
+        }
         public static Vector3 GetMousePositionTo3D(Camera camera, Vector2 position, float zPos)
         {
             Vector3 mousePosition = position;

@@ -46,10 +46,11 @@ namespace JTI.Scripts.Managers
             return this;
         }
 
-        public void Get(Enum a, object def)
+        public T Get<T>(Enum a, T def)
         {
-            _storage.LoadDefault(a.ToString(), def);
+            return _storage.LoadDefault(a.ToString(), def);
         }
+
 
         public void Set(Enum a, object val)
         {

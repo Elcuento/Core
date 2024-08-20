@@ -65,7 +65,7 @@ namespace JTI.Scripts
 
                         _touch = t;
 
-                        Delta = (t.position - Position).normalized;
+                        Delta = t.deltaPosition;
                         Position = t.position;
 
                         if (t.phase == TouchPhase.Ended)

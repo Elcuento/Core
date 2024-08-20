@@ -4,13 +4,14 @@ using UnityEngine;
 using UnityEngine.Analytics;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static JTI.Scripts.ClickHandlerExtended;
 
 namespace JTI.Scripts
 {
     public class ClickHandlerExtended : MonoBehaviour
     {
         public Action OnUpdateEvent;
-
+        public Action<Touch> OnAddTouchEvent;
         public class Touch
         {
             public int Id;
@@ -42,11 +43,22 @@ namespace JTI.Scripts
             var exist = Touches.Find(x => x.TouchSource.fingerId == aTouch.fingerId);
             if (exist != null) return;
 
-            Touches.Add(new Touch
+            var touch = new Touch
             {
                 Id = aTouch.fingerId,
                 TouchSource = aTouch
-            });
+            };
+
+            Touches.Add(touch);
+
+            try
+            {
+                OnAddTouchEvent?.Invoke(touch);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+            }
         }
         private void Start()
         {
@@ -77,6 +89,15 @@ namespace JTI.Scripts
 
                         Touches.Add(to);
 
+                        try
+                        {
+                            OnAddTouchEvent?.Invoke(to);
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogError(e);
+                        }
+
                         Update();
 
                         break;
@@ -88,11 +109,22 @@ namespace JTI.Scripts
             {
                 if (Touches.Count == 0)
                 {
-                    Touches.Add(new Touch()
+                    var touch = new Touch()
                     {
                         TouchSource = new UnityEngine.Touch(),
                         Id = 0
-                    });
+                    };
+
+                    Touches.Add(touch);
+
+                    try
+                    {
+                        OnAddTouchEvent?.Invoke(touch);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e);
+                    }
 
                     Update();
                 }

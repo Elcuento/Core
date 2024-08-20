@@ -506,7 +506,23 @@ namespace JTI.Scripts.GameControllers
             }
         }
 
-        
+        public void PlayOneShotExternalSource(AudioSource s, string id)
+        {
+            var clip = GetClip(id);
+            var data = GetAudioData(id);
+
+            // Debug.Log(clip +":" + clip?.length);
+            if (clip != null)
+            {
+                var source = s;
+
+                source.volume = GetVolumeByGroup(-1) *
+                                (data == null
+                                    ? 1f
+                                    : data.Volume);
+                source.Play();
+            }
+        }
         public void PlayOneShot3D(string id, Transform tr)
         {
 
