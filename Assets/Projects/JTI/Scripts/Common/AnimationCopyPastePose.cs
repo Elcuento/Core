@@ -6,6 +6,7 @@ using UnityEditor;
 
 public class AnimationCopyPastePose : MonoBehaviour
 {
+#if UNITY_EDITOR
     [System.Serializable]
     public class TransformInfo
     {
@@ -112,4 +113,5 @@ public class AnimationCopyPastePose : MonoBehaviour
             else Debug.Log("Couldn't find child " + childInfo.name + " of " + t.name, t.gameObject);
         }
     }
+#endif
 }

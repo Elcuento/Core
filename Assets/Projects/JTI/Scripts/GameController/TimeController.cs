@@ -45,9 +45,17 @@ namespace JTI.Scripts.Managers
 
         private float _currentTimeScale;
 
+        private float _currentTimeScaleMultiplier;
+
         private EventSubscriberLocal<GameEvent> _eventSubscriberLocal;
 
         private TimeControllerSettings _settings;
+
+
+        protected override void OnAwake()
+        {
+            GetTime();
+        }
 
         protected override void OnInstall()
         {
@@ -56,8 +64,6 @@ namespace JTI.Scripts.Managers
             _currentTimeScale = 1;
 
             _eventSubscriberLocal = new EventSubscriberLocal<GameEvent>(GameManager.Instance.GameEvents);
-
-            Update();
 
             _startTimeScale = Time.timeScale;
 
@@ -97,18 +103,26 @@ namespace JTI.Scripts.Managers
                 Time.fixedDeltaTime = _physicDelta * timeScale;
             }
         }
+        public void SetTimeScale(float timeScale)
+        {
+            if (timeScale > 0)
+            {
+                Time.timeScale = timeScale;
+                Time.fixedDeltaTime = _physicDelta * timeScale;
+            }
+        }
 
         public void AddExtraNowUnixSecondsTime(long a)
         {
             NowUnixSecondsExtra += a;
         }
 
-      /*  private void OnApplicationPause(bool isPause)
+
+        private void GetTime()
         {
-            if (!isPause)
-                Now = DateTime.UtcNow;
+            Now = new DateTime(DateTime.UtcNow.Ticks, DateTimeKind.Utc);
+            NowUnixSeconds = new DateTimeOffset(Now).ToUnixTimeSeconds() + NowUnixSecondsExtra;
         }
-        */
         private void Update()
         {
             var timestamp = DateTime.UtcNow.Ticks;
@@ -128,8 +142,6 @@ namespace JTI.Scripts.Managers
 
             if (!_settings.SendEventTick)
                 return;
-
-            Time.timeScale = _currentTimeScale;
 
             if (_unscaledSecondsTimerValue <= 0)
             {

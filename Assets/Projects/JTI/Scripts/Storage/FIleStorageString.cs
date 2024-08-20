@@ -8,6 +8,12 @@ namespace JTI.Scripts.Storage
 {
     public class FileStorageString
     {
+        public class ValueChangeConverted<T>
+        {
+            public T Was;
+            public T Become;
+            public string Key;
+        }
         public class ValueChange
         {
             public object Was;
@@ -15,7 +21,7 @@ namespace JTI.Scripts.Storage
             public string Key;
         }
 
-        public Action<ValueChange> OnValueChangeEvent;
+        public string Prefix => Application.isEditor ? ".txt" : "";
 
         protected class Variable
         {
@@ -28,8 +34,9 @@ namespace JTI.Scripts.Storage
 
         protected bool _noSave;
         protected bool _autoSave;
-        protected virtual string _path { get; } = Application.persistentDataPath;
-        public string Prefix => Application.isEditor ? ".txt" : "";
+        protected Dictionary<string, Action<ValueChange>> _variableUpdateDictionary;
+        protected virtual string _path { get; } = Application.persistentDataPath +"/Saves/";
+
 
         public void UnLoad<T>(string key)
         {
@@ -63,20 +70,60 @@ namespace JTI.Scripts.Storage
             }
         }
 
-        public void Subscribe(Action<ValueChange> ev)
+        public ValueChangeConverted<TV> GetValueConverted<TV>(ValueChange a)
         {
-            OnValueChangeEvent -= ev;
-            OnValueChangeEvent += ev;
+            var vChange = new ValueChangeConverted<TV>();
+
+            if (a == null)
+            {
+                return vChange;
+            }
+            try
+            {
+                vChange.Key = a.Key;
+                vChange.Become = (TV)a.Become;
+                vChange.Was = (TV)a.Was;
+            }
+            catch (Exception e)
+            {
+                return vChange;
+            }
+
+            return vChange;
         }
-        public void Unsubscribe(Action<ValueChange> ev)
+
+        public void FireVariableChange(ValueChange aChange)
         {
-            OnValueChangeEvent -= ev;
+            if (_variableUpdateDictionary.ContainsKey(aChange.Key))
+            {
+                _variableUpdateDictionary[aChange.Key]?.Invoke(aChange);
+            }
+        }
+        public void Subscribe(string key, Action<ValueChange> a)
+        {
+            if (_variableUpdateDictionary.ContainsKey(key))
+            {
+                _variableUpdateDictionary[key] += a;
+            }
+            else
+            {
+                _variableUpdateDictionary.Add(key, null);
+                _variableUpdateDictionary[key] += a;
+            }
+        }
+        public void Unsubscribe(string key, Action<ValueChange> a)
+        {
+            if (_variableUpdateDictionary.ContainsKey(key))
+            {
+                _variableUpdateDictionary[key] -= a;
+            }
         }
 
         public FileStorageString()
         {
             _autoSave = true;
             _values = new Dictionary<string, Variable>();
+            _variableUpdateDictionary = new Dictionary<string, Action<ValueChange>>();
 
             try
             {
@@ -135,7 +182,7 @@ namespace JTI.Scripts.Storage
 
             if (_values[key] == null)
             {
-                _values[key] = new Variable() { Saved = false, Value = val };
+                _values[key] = new Variable() { Saved = false, Value = val, Key = key};
                 _values[key].Saved = false;
             }
             else
@@ -146,7 +193,7 @@ namespace JTI.Scripts.Storage
 
             try
             {
-                OnValueChangeEvent?.Invoke(new ValueChange()
+                FireVariableChange(new ValueChange()
                 {
                     Become = val,
                     Was = was,
@@ -175,7 +222,6 @@ namespace JTI.Scripts.Storage
             {
                 if (File.Exists(p + Prefix))
                 {
-                    Debug.Log("Remove key done " + key);
                     File.Delete(p + Prefix);
                 }
             }
@@ -186,7 +232,7 @@ namespace JTI.Scripts.Storage
 
             try
             {
-                OnValueChangeEvent?.Invoke(new ValueChange()
+                FireVariableChange(new ValueChange()
                 {
                     Become = null,
                     Was = was,
@@ -231,7 +277,7 @@ namespace JTI.Scripts.Storage
 
             try
             {
-                OnValueChangeEvent?.Invoke(new ValueChange()
+                FireVariableChange(new ValueChange()
                 {
                     Become = _values[key].Value,
                     Was = was,
@@ -250,10 +296,9 @@ namespace JTI.Scripts.Storage
 
         public TU LoadDefault<TU>(string key, TU def)
         {
+            var was = _values.ContainsKey(key) ? _values[key]?.Value : null;
 
-            var was = _values[key]?.Value;
-
-            if (_values[key] != null)
+            if (_values.ContainsKey(key) && _values[key] != null)
             {
                 if (_values[key].Value == null)
                 {
@@ -273,12 +318,14 @@ namespace JTI.Scripts.Storage
 
                     if (v != null)
                     {
-                        _values[key] = new Variable() { Saved = true, Value = v };
+                        Set(key, v);
+                        return v;
                     }
                 }
                 else
                 {
-                    _values[key] = new Variable() { Saved = true, Value = def };
+                    Set(key, def);
+                    return def;
                 }
             }
             catch (Exception e)
@@ -293,7 +340,7 @@ namespace JTI.Scripts.Storage
 
             try
             {
-                OnValueChangeEvent?.Invoke(new ValueChange()
+                FireVariableChange(new ValueChange()
                 {
                     Become = _values[key].Value,
                     Was = was,

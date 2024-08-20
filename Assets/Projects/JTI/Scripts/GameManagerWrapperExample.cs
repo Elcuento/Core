@@ -1,8 +1,8 @@
 using JTI.Scripts.Managers;
 
-namespace JTI.Examples
+namespace JTI.Scripts
 {
-    public class GameManagerWrapper : GameManager
+    public class GameManagerWrapperExample : GameManager
     {
         protected override void InstallControllers()
         {
@@ -17,7 +17,6 @@ namespace JTI.Examples
             AddController<ProfileController>()
                 .SetSettings(new ProfileController.ProfileControllerSettings())
                 .Install();
-
         }
 
     }

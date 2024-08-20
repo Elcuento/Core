@@ -20,6 +20,10 @@ public class LevelBehaviour : MonoBehaviour
         OnAwake();
     }
 
+    private void Start()
+    {
+        OnStart();
+    }
     public T GetMaster<T>() where T : LevelMaster
     {
         return Master as T;
@@ -27,7 +31,10 @@ public class LevelBehaviour : MonoBehaviour
 
     private void OnDestroy()
     {
-        Master.RemoveLevelBehaviour(this);
+        if (Master != null)
+        {
+            Master.RemoveLevelBehaviour(this);
+        }
 
         OnOnDestroy();
     }
@@ -41,7 +48,15 @@ public class LevelBehaviour : MonoBehaviour
     {
 
     }
+    protected virtual void OnSetup()
+    {
+
+    }
     protected virtual void OnAwake()
+    {
+
+    }
+    protected virtual void OnStart()
     {
 
     }

@@ -8,7 +8,7 @@ using static JTI.Scripts.ClickHandlerExtended;
 
 namespace JTI.Scripts
 {
-    public class ClickHandlerExtended : MonoBehaviour
+    public class ClickHandlerExtended : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
     {
         public Action OnUpdateEvent;
         public Action<Touch> OnAddTouchEvent;
@@ -30,6 +30,8 @@ namespace JTI.Scripts
 
         private void OnDisable()
         {
+            _isOn = false;
+
             foreach (var touch in Touches)
             {
                 touch.UnPressed = true;
@@ -135,6 +137,7 @@ namespace JTI.Scripts
         }
 
         private bool _updated;
+        private bool _isOn;
 
         private void Update()
         {
@@ -153,7 +156,7 @@ namespace JTI.Scripts
 
                         Touch touch = null;
 
-                        if (t.phase == TouchPhase.Began && (CheckClick(t.position)))
+                        if (t.phase == TouchPhase.Began && (CheckClick(t.position)) && _isOn)
                         {
                             Touches.Add(touch = new Touch()
                             {
@@ -217,7 +220,7 @@ namespace JTI.Scripts
                         Touches.Add(touch);
                     }
                 }
-                else
+                else if (Touches.Count != 0)
                 {
                     if (!Input.GetKeyUp(KeyCode.Mouse0) && Input.GetKey(KeyCode.Mouse0))
                     {
@@ -226,16 +229,15 @@ namespace JTI.Scripts
                             touch.TouchSource.phase = TouchPhase.Moved;
                         }
                     }
-                }
 
-                if (Input.GetKeyUp(KeyCode.Mouse0))
-                {
-                    foreach (var touch in Touches)
+                    if (Input.GetKeyUp(KeyCode.Mouse0))
                     {
-                        touch.TouchSource.phase = TouchPhase.Ended;
+                        foreach (var touch in Touches)
+                        {
+                            touch.TouchSource.phase = TouchPhase.Ended;
+                        }
                     }
                 }
-
 
 
                 var mouseDelta = (Input.mousePosition - _lastClick).normalized;
@@ -266,6 +268,8 @@ namespace JTI.Scripts
                     }
                 }
             }
+
+            _isOn = false;
         }
 
         private void LateUpdate()
@@ -279,6 +283,24 @@ namespace JTI.Scripts
 
             var results = new List<RaycastResult>();
 
+            /*  var allRaycasters = FindObjectsOfType<GraphicRaycaster>(); // Bad one
+
+
+              foreach (var allRaycaster in allRaycasters)
+              {
+                  allRaycaster.Raycast(pointerEventData, results);
+
+                  for (var index = 0; index < results.Count; index++)
+                  {
+                      var result = results[index];
+
+                      if (result.gameObject != gameObject)
+                      {
+                          return false;
+                      }
+                  }
+              }
+              */
             _raycaster.Raycast(pointerEventData, results);
 
             for (var index = 0; index < results.Count; index++)
@@ -294,5 +316,19 @@ namespace JTI.Scripts
             return false;
         }
 
+        public void OnPointerClick(PointerEventData eventData)
+        {
+           
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            _isOn = true;
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+
+        }
     }
 }

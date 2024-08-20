@@ -11,24 +11,28 @@ namespace JTI.Scripts
         public Action OnClickDownEvent;
         public Action OnClickEvent;
         public Action OnClickUpEvent;
-
-        public Vector2 Position { get; private set; }
-        public Vector2 Delta { get; private set; }
-
-        private bool _click;
-        private Vector3 _lastClick;
-
+        
         public GraphicRaycaster _raycaster;
-        PointerEventData pointerEventData;
-        EventSystem eventSystem;
 
-        private Touch _touch;
+        public Vector2 Position { get; protected set; }
+        public Vector2 Delta { get; protected set; }
 
-        private void OnDisable()
+        protected bool _click;
+        private Vector3 _lastClick;
+        private PointerEventData pointerEventData;
+        private EventSystem eventSystem;
+        protected Touch _touch;
+        
+        protected virtual void OnDisable()
         {
             PressUp();
         }
 
+        protected virtual void OnEnable()
+        {
+            
+        }
+        
         private void Start()
         {
             if (_raycaster == null)
@@ -40,7 +44,7 @@ namespace JTI.Scripts
             eventSystem = EventSystem.current;
         }
 
-        private void Update()
+        protected virtual void Update()
         {
             if (Application.isMobilePlatform)
             {
@@ -54,7 +58,7 @@ namespace JTI.Scripts
                         {
                             if (CheckClick(t.position))
                             {
-                                Delta = (t.position - Position).normalized;
+                                Delta = t.deltaPosition;
                                 Position = t.position;
                                 PressDown(t);
                             }
@@ -65,7 +69,7 @@ namespace JTI.Scripts
 
                         _touch = t;
 
-                        Delta = t.deltaPosition;
+                        Delta = (t.position - Position).normalized;
                         Position = t.position;
 
                         if (t.phase == TouchPhase.Ended)
@@ -112,7 +116,7 @@ namespace JTI.Scripts
 
         }
 
-        private bool CheckClick(Vector3 pos)
+        protected bool CheckClick(Vector3 pos)
         {
             pointerEventData = new PointerEventData(eventSystem) { position = pos };
 
@@ -123,7 +127,7 @@ namespace JTI.Scripts
             for (var index = 0; index < results.Count; index++)
             {
                 var result = results[index];
-
+                
                 if (result.gameObject == gameObject && index == 0)
                 {
                     return true;
@@ -133,7 +137,7 @@ namespace JTI.Scripts
             return false;
         }
 
-        private void Press(Touch t)
+        protected void Press(Touch t)
         {
             if (_click)
             {
@@ -148,7 +152,7 @@ namespace JTI.Scripts
              
             }
         }
-        private void Press()
+        protected void Press()
         {
             if (_click)
             {
@@ -164,7 +168,7 @@ namespace JTI.Scripts
             }
         }
 
-        private void PressUp(Touch t)
+        protected void PressUp(Touch t)
         {
             if (_click)
             {
@@ -181,7 +185,7 @@ namespace JTI.Scripts
              
             }
         }
-        private void PressUp()
+        protected void PressUp()
         {
             if (_click)
             {
@@ -199,7 +203,7 @@ namespace JTI.Scripts
             }
         }
 
-        private void PressDown(Touch t)
+        protected void PressDown(Touch t)
         {
             _touch = t;
             _click = true;
@@ -215,7 +219,7 @@ namespace JTI.Scripts
     
         }
 
-        private void PressDown()
+        protected void PressDown()
         {
             _click = true;
 

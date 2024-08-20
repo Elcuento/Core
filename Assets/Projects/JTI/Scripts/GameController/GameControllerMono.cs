@@ -20,7 +20,7 @@ namespace JTI.Scripts.GameControllers
 
         protected void Awake()
         {
-         
+         OnAwake();
         }
 
         public void Install()
@@ -74,6 +74,11 @@ namespace JTI.Scripts.GameControllers
         }
 
         protected virtual void OnOnDestroy()
+        {
+
+        }
+
+        protected virtual void OnAwake()
         {
 
         }

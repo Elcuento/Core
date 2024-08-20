@@ -27,6 +27,10 @@ namespace JTI.Scripts.Managers
         public List<GameServiceBase> GameServices { get; private set; }
         public EventManagerLocal<GameEvent> GameEvents { get; private set; }
 
+        public T GetInstance<T>() where T : GameManager
+        {
+            return this as T;
+        }
         private bool IsMonoBehavior<T>()
         {
             var type = typeof(T);
@@ -40,7 +44,10 @@ namespace JTI.Scripts.Managers
             }
             return false;
         }
-
+        public T GetController<T>()
+        {
+            return (T)GameControllers.FirstOrDefault(x => x is T);
+        }
         public T AddController<T>() where T : IController, new()
         {
             if (IsMonoBehavior<T>())
@@ -59,10 +66,7 @@ namespace JTI.Scripts.Managers
             GameControllers.Add(b);
             return b;
         }
-        public T GetController<T>()
-        {
-            return (T)GameControllers.FirstOrDefault(x => x is T);
-        }
+
         public T AddController<T>(T c) where T : MonoBehaviour, IController
         {
             c.SetManager(this);
@@ -80,10 +84,7 @@ namespace JTI.Scripts.Managers
 
             Initialize();
         }
-        public T GetInstance<T>() where T : GameManager
-        {
-            return this as T;
-        }
+
         protected virtual void InstallControllers()
         {
            
@@ -128,7 +129,7 @@ namespace JTI.Scripts.Managers
 
             _controllersToInstall = null;
         }
-   
+
         private void InitializeControllers()
         {
             foreach (var gameController in GameControllers)
@@ -160,5 +161,6 @@ namespace JTI.Scripts.Managers
 
         }
 
+    
     }
 }

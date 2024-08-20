@@ -490,6 +490,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
     {
         public bool AlwaysOnScreen;
         public bool Hide;
+        public float Height;
     }
     public class SettingsElement
     {
@@ -560,7 +561,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
         if (EventSystem.current == null)
         {
-            Debug.LogError("No EventSystem in scene! Add it first");
+            Debug.Log("No EventSystem in scene! Add it first");
         }
 
         Application.logMessageReceived += OnGetMessage;

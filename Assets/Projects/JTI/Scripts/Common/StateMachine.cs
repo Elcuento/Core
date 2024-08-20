@@ -20,7 +20,7 @@ namespace JTI.Scripts.Common
 
         public void StopState()
         {
-            if (CurrentState == null || CurrentState.IsEnded) return;
+			if (CurrentState == null || CurrentState.IsEnded) return;
 
             CurrentState.Stop();
         }
@@ -30,7 +30,7 @@ namespace JTI.Scripts.Common
             if (CurrentState == null || CurrentState.IsEnded) return;
 
             CurrentState.Update();
-        }
+		}
 
         public void EndState(bool change)
         {
@@ -39,18 +39,18 @@ namespace JTI.Scripts.Common
             CurrentState.End(change);
         }
     }
-    public class State
+	public class State
     {
         public Action<bool> OnEndEvent;
         public bool IsEnded;
 
-        public void End(bool stopped = false)
+        public void End(bool change = false)
         {
             if (IsEnded) return;
 
             IsEnded = true;
-            OnEnd(stopped);
-            OnEndEvent?.Invoke(stopped);
+            OnEnd(change);
+            OnEndEvent?.Invoke(change);
         }
 
         public void Start()
@@ -68,7 +68,7 @@ namespace JTI.Scripts.Common
             OnStop();
         }
 
-        public virtual void OnUpdate()
+		public virtual void OnUpdate()
         {
 
         }
@@ -83,9 +83,9 @@ namespace JTI.Scripts.Common
         }
         public virtual void OnStop()
         {
-
+           
         }
 
 
-    }
+	}
 }

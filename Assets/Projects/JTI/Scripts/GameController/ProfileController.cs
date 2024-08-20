@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using Assets.JTI.Scripts.Events.Game;
 using JTI.Scripts.Events;
 using JTI.Scripts.Events.Game;
 using JTI.Scripts.GameControllers;
 using JTI.Scripts.Storage;
+using UnityEngine;
 
 namespace JTI.Scripts.Managers
 {
@@ -27,7 +29,13 @@ namespace JTI.Scripts.Managers
 
         private ProfileControllerSettings _settings;
 
-        private FileStorageString _storage;
+        protected FileStorageString _storage;
+
+
+        public FileStorageString.ValueChangeConverted<TV> GetValueConverted<TV>(FileStorageString.ValueChange a)
+        {
+            return _storage.GetValueConverted<TV>(a);
+        }
 
         protected override void OnInstall()
         {
@@ -37,8 +45,17 @@ namespace JTI.Scripts.Managers
 
             _storage = new FileStorageString();
             _storage.SetAutosave(_settings.Autosave);
+          
         }
 
+        public void Subscribe(string key, Action<FileStorageString.ValueChange> a)
+        {
+            _storage.Subscribe(key,a);
+        }
+        public void Unsubscribe(string key, Action<FileStorageString.ValueChange> a)
+        {
+            _storage.Unsubscribe(key, a);
+        }
         public ProfileController SetSettings(ProfileControllerSettings a)
         {
             _settings = a;
@@ -50,7 +67,6 @@ namespace JTI.Scripts.Managers
         {
             return _storage.LoadDefault(a.ToString(), def);
         }
-
 
         public void Set(Enum a, object val)
         {
