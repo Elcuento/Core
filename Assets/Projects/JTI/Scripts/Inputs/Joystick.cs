@@ -124,16 +124,15 @@ namespace JTI.Scripts
                     _clickHandler.Position);
             }
 
-            var d = Vector3.Distance((Vector2)transform.position, pos);
-            var max = Mathf.Clamp(d / _range, 0, 1);
-            var dir = (pos - (Vector2)transform.position).normalized;
-            _handler.transform.localPosition = max * _handler.transform.InverseTransformVector(_range * dir);
+            var localPoint = transform.InverseTransformPoint(pos);
+            localPoint.z = 0;
+            var localDistance = localPoint.magnitude;
+            var percent = Mathf.Clamp((localDistance - _deathZone) / (_range - _deathZone), 0, 1);
+            var dir = localPoint.normalized;
 
-            var dist = Vector3.Distance(_handler.transform.position, transform.position);
+            _handler.transform.localPosition = percent * _range * dir;
 
-            if (dist > _deathZone)
-                Axis = dir.normalized * max;
-            else Axis = Vector2.zero;
+            Axis = dir * percent;
 
             MoveEvent?.Invoke(Axis);
         }

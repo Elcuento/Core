@@ -24,6 +24,7 @@ public class LevelBehaviour : MonoBehaviour
     {
         OnStart();
     }
+    
     public T GetMaster<T>() where T : LevelMaster
     {
         return Master as T;
