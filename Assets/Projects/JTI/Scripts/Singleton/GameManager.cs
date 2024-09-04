@@ -1,17 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.JTI.Scripts.Events.Game;
 using JTI.Scripts.Events;
 using JTI.Scripts.Events.Game;
 using JTI.Scripts.GameControllers;
 using JTI.Scripts.GameServices;
+using JTI.Scripts.Level;
 using UnityEngine;
 
 namespace JTI.Scripts.Managers
 {
     public class GameManager : SingletonMonoSimple<GameManager>
     {
+        [SerializeField] private string _resourcesPath = "Game/";
+
+        public string ResourcesPath => _resourcesPath;
+
         public interface IController
         {
             public void Install();
@@ -23,9 +27,27 @@ namespace JTI.Scripts.Managers
 
         [SerializeField] private GameControllerMono[] _controllersToInstall;
 
+        public List<LevelMaster> LevelMasters { get; private set; } = new List<LevelMaster>();
         public List<IController> GameControllers { get; private set; }
         public List<GameServiceBase> GameServices { get; private set; }
         public EventManagerLocal<GameEvent> GameEvents { get; private set; }
+
+        public T GetFirstLevelMasterAs<T>() where T : LevelMaster
+        {
+            return LevelMasters.FirstOrDefault(x => x is T) as T;
+        }
+
+        public void AddLevelMaster(LevelMaster levelMaster)
+        {
+            if (!LevelMasters.Contains(levelMaster))
+            {
+                LevelMasters.Add(levelMaster);
+            }
+        }
+        public void RemoveLevelMaster(LevelMaster levelMaster)
+        {
+            LevelMasters.Remove(levelMaster);
+        }
 
         public T GetInstance<T>() where T : GameManager
         {
@@ -161,6 +183,6 @@ namespace JTI.Scripts.Managers
 
         }
 
-    
+
     }
 }

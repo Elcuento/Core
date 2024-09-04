@@ -105,11 +105,8 @@ namespace JTI.Scripts.Managers
         }
         public void SetTimeScale(float timeScale)
         {
-            if (timeScale > 0)
-            {
-                Time.timeScale = timeScale;
-                Time.fixedDeltaTime = _physicDelta * timeScale;
-            }
+            Time.timeScale = timeScale;
+            Time.fixedDeltaTime = _physicDelta * timeScale;
         }
 
         public void AddExtraNowUnixSecondsTime(long a)

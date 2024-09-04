@@ -781,7 +781,6 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     private void Main()
     {
-        //  var c = AddText("Scene : ");
         OpenPage(MainPage(), main: false);
     }
 

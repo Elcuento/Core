@@ -72,7 +72,7 @@ namespace JTI.Scripts
                         Delta = (t.position - Position).normalized;
                         Position = t.position;
 
-                        if (t.phase == TouchPhase.Ended)
+                        if (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled)
                         {
                             PressUp(t);
                         }

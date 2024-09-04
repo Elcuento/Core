@@ -20,7 +20,7 @@ namespace JTI.Scripts.GameControllers
 
         protected void Awake()
         {
-         OnAwake();
+           OnAwake();
         }
 
         public void Install()

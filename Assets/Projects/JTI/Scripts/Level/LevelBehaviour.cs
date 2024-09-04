@@ -41,9 +41,13 @@ public class LevelBehaviour : MonoBehaviour
 
     public virtual void ChangeState(LevelMaster.LevelState state)
     {
-
+        OnChangeState(state);
     }
 
+    protected virtual void OnChangeState(LevelMaster.LevelState state)
+    {
+
+    }
     protected virtual void OnOnDestroy()
     {
 

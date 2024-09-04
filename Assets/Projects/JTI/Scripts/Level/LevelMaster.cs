@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JTI.Scripts.Events;
 using JTI.Scripts.Events.Level;
+using JTI.Scripts.Managers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -49,6 +50,7 @@ namespace JTI.Scripts.Level
 
         private EventSubscriberMonoLocal<LevelEvent> _subscriber;
 
+
         private void Awake()
         {
             EventManager = new EventManagerLocal<LevelEvent>();
@@ -56,22 +58,29 @@ namespace JTI.Scripts.Level
 
             CreateResult();
 
+            GameManager.Instance.AddLevelMaster(this);
+
             OnAwake();
         }
 
         private void Start()
         {
             ChangeState(LevelState.Awake);
-
-            OnStart();
         }
 
         private void OnDestroy()
         {
             _subscriber?.Destroy();
 
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.RemoveLevelMaster(this);
+            }
+
             OnOnDestroy();
         }
+
+
         private void SetupControllers()
         {
             for (var index = 0; index < _controllers.Count; index++)
@@ -105,7 +114,7 @@ namespace JTI.Scripts.Level
             yield return null;
         }
 
-        private void ChangeState(LevelState state)
+        protected void ChangeState(LevelState state)
         {
             if (CurrentState == LevelState.IsEnd) return;
 
@@ -250,11 +259,21 @@ namespace JTI.Scripts.Level
             return true;
         }
 
+        protected virtual void CreateResult()
+        {
+            Result = new LevelResult();
+        }
+
         protected virtual void OnOnDestroy()
         {
 
         }
+
         protected virtual void OnAwake()
+        {
+
+        }
+        protected virtual void OnChangeState(LevelState s)
         {
 
         }
@@ -262,15 +281,5 @@ namespace JTI.Scripts.Level
         {
 
         }
-        protected virtual void OnChangeState(LevelState state)
-        {
-
-        }
-
-        protected virtual void CreateResult()
-        {
-            Result = new LevelResult();
-        }
-
     }
 }

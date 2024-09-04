@@ -6,6 +6,7 @@ using JTI.Scripts.Common;
 using JTI.Scripts.Events;
 using JTI.Scripts.Events.Game;
 using JTI.Scripts.Localization.Data;
+using JTI.Scripts.Managers;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -80,6 +81,26 @@ namespace JTI.Scripts.GameControllers
                 _volumeByGroup = new List<AudioVolume>();
                 _addAudioListener = addAudioListener;
             }
+
+            public void SetVolumeByGroup(int i, float f)
+            {
+                if (_volumeMap.ContainsKey(i))
+                {
+                    _volumeMap[i].Volume = f;
+                }
+                else
+                {
+                    var v = _volumeByGroup.Find(x => x.Group == i);
+                    if (v != null)
+                    {
+                        v.Volume = f;
+                    }
+                    else
+                    {
+                        _volumeMap.Add(i, new AudioVolume() { Volume = f, Group = i });
+                    }
+                }
+            }
         }
 
         [System.Serializable]
@@ -108,7 +129,7 @@ namespace JTI.Scripts.GameControllers
             {
                 if (IsDestroyed) return;
 
-                Source.PlayOneShot(clip, volumeMultiply);
+                Source.PlayOneShot(clip, volumeMultiply * Controller.GetVolumeByGroup(Group));
             }
 
 
@@ -457,7 +478,12 @@ namespace JTI.Scripts.GameControllers
             {
                 yield return new WaitForSeconds(delay);
 
-                _commonAudioTrack.PlayOneShot(clip, multiply);
+                var data = GetAudioData(clip?.name);
+
+                if (clip != null)
+                {
+                    _commonAudioTrack.PlayOneShot(clip, multiply * (data?.Volume ?? 1));
+                }
             }
         }
 
@@ -484,12 +510,8 @@ namespace JTI.Scripts.GameControllers
                     }
                 };
                 var source = go.AddComponent<AudioSource>();
-                source.volume = GetVolumeByGroup(-1);
                 source.clip = clip;
                 source.spatialBlend = 1;
-                source.dopplerLevel = 0;
-                source.spread = 1;
-                source.rolloffMode = AudioRolloffMode.Linear;
                 source.maxDistance = data == null || data.Range == -1 ? 1.1f : data.Range;
                 source.volume = GetVolumeByGroup(-1) *
                 (data == null
@@ -629,7 +651,12 @@ namespace JTI.Scripts.GameControllers
         {
             return _settings.GetVolumeByGroup(a).Volume;
         }
+        public void SetVolumeByGroup(int a, float b)
+        {
+            _settings.SetVolumeByGroup(a,b);
 
+             GameManager.Instance.GameEvents.Publish(new ChangeSoundSettingsEvent());
+        }
         public AudioTrack CreateTrack(string id, int group, bool loop = false, bool donNotDestroy = false)
         {
             var source = gameObject.AddComponent<AudioSource>();

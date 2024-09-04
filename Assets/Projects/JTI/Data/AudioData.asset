@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _clipsData:
   - {fileID: 11400000, guid: ed692e25523bb2c448e7a4fa2b857c81, type: 2}
+  _clipFolder: Game/Audio/

@@ -186,10 +186,9 @@ namespace JTI.Scripts
                     // ignored
                 }
 
-
                 for (var index = 0; index < Touches.Count; index++)
                 {
-                    if (Touches[index].TouchSource.phase == TouchPhase.Ended)
+                    if (Touches[index].TouchSource.phase == TouchPhase.Ended || Touches[index].TouchSource.phase == TouchPhase.Canceled)
                     {
                         Touches.Remove(Touches[index]);
                         index--;
