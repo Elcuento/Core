@@ -527,7 +527,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     public Action<ConsoleMessage> OnGetNewConsoleMessageEvent;
     public List<ConsoleMessage> ConsoleMessages { get; private set; }
-
+    public bool IsLogsEnable { get; private set; } = true;
     public bool IsEnable { get; private set; } = true;
     protected static Font Font { get; private set; }
 
@@ -583,6 +583,20 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     }
 
+    public void SetLogEnable(bool a)
+    {
+        IsLogsEnable = a;
+
+        if (!IsLogsEnable)
+        {
+            Application.logMessageReceived -= OnGetMessage;
+        }
+        else
+        {
+            Application.logMessageReceived -= OnGetMessage;
+            Application.logMessageReceived += OnGetMessage;
+        }
+    }
     public void SetLogBufferSize(long logBufferSize)
     {
         _logBufferSize = logBufferSize;
@@ -590,6 +604,9 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     private void OnGetMessage(string label, string text, LogType type)
     {
+        if (!IsLogsEnable)
+            return;
+
         var mes = new ConsoleMessage()
         {
             label = label,

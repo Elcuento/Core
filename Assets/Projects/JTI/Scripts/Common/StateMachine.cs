@@ -27,7 +27,10 @@ namespace JTI.Scripts.Common
 
         public void UpdateState()
         {
-            if (CurrentState == null || CurrentState.IsEnded) return;
+            if (CurrentState == null || CurrentState.IsEnded)
+            {
+                return;
+            }
 
             CurrentState.Update();
 		}
