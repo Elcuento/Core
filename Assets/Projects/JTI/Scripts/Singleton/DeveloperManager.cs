@@ -541,7 +541,7 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
     private long _logBufferSize = 3600000;
     private long _currentLogBufferSize;
-
+    private string _logsFolder;
     protected virtual void CreateFont()
     {
         Font = Font.CreateDynamicFontFromOSFont("Arial", 1);
@@ -570,14 +570,19 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
 
         try
         {
-            logText = File.ReadAllText(Application.persistentDataPath + "/Logs.txt");
+            if (!Directory.Exists(Application.persistentDataPath + _logsFolder))
+            {
+                Directory.CreateDirectory(Application.persistentDataPath + _logsFolder);
+            }
+
+            logText = File.ReadAllText(Application.persistentDataPath + _logsFolder + "/Logs.txt");
             _currentLogBufferSize = logText.Length;
         }
         catch (Exception e)
         {
             if (logText.Length > 36000)
             {
-                File.Delete(Application.persistentDataPath + "/Logs.txt");
+                File.Delete(Application.persistentDataPath + _logsFolder + "/Logs.txt");
             }
         }
 
@@ -624,11 +629,11 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
         {
             if (_currentLogBufferSize > _logBufferSize)
             {
-                File.Delete(Application.persistentDataPath + "/Logs.txt");
+                File.Delete(Application.persistentDataPath + _logsFolder + "/Logs.txt");
                 _currentLogBufferSize = 0;
             }
 
-            File.AppendAllText(Application.persistentDataPath + "/Logs.txt", "\n" + $"[{DateTime.Now}][{type}][{label}]\n{text}");
+            File.AppendAllText(Application.persistentDataPath + _logsFolder + "/Logs.txt", "\n" + $"[{DateTime.Now}][{type}][{label}]\n{text}");
         }
         catch (Exception e)
         {
@@ -966,7 +971,10 @@ public class DeveloperManager : SingletonMono<DeveloperManager>
             Cursor.lockState = CursorLockMode.None;
         }
     }
-
+    public void SetLogsFolder(string configId)
+    {
+        _logsFolder = configId;
+    }
     public void Enable(bool en)
     {
         IsEnable = en;
